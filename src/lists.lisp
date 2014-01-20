@@ -39,6 +39,7 @@
 	  (cons (my-copy-tree (car root))
 			(my-copy-tree (cdr root)))))
 
+;; 自定义subst
 (defun my-subst (new old tree)
   (if (eql old tree)
 	  new
