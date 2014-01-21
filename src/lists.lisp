@@ -24,7 +24,7 @@
 	    (rest (uncompress (cdr lst))))
 	    (if (consp elt)
 		(append (apply #'list-of elt) rest)
-		(cons elt rest)))))}
+		(cons elt rest)))))
 
 (defun list-of (n elt)
   (if (zerop n)
@@ -49,5 +49,21 @@
 				(my-subst new old (cdr tree))))))
 	  
 
+(defun our-member-if (fn lst)
+  (and (consp lst)
+	   (if (funcall fn (car lst))
+		   lst
+		   (our-member-if fn (cdr lst)))))
+
+(defun mirror? (s)
+  (let ((len (length s)))
+    (if (evenp len)
+         (let ((mid (/ len 2)))
+           (equal (subseq s 0 mid)
+                  (reverse (subseq s mid))))
+		 (or (equal len 0)
+			 (let ((mid (/ (- len 1) 2)))
+			   (equal (subseq s 0 mid)
+					  (reverse (subseq s (+ mid 1)))))))))
 
 
