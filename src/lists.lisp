@@ -66,4 +66,8 @@
 			   (equal (subseq s 0 mid)
 					  (reverse (subseq s (+ mid 1)))))))))
 
+(defun nthmost (n lst)
+  (nth (- n 1)
+	   (sort (copy-list lst) #'>)))
+
 
