@@ -71,3 +71,16 @@
 	   (sort (copy-list lst) #'>)))
 
 
+(defun our-reverse (lst)
+  (let ((acc nil))
+	(dolist (elt lst)
+	  (push elt acc))
+	acc))
+
+(defun our-assoc (key lst)
+  (and (consp lst)
+	   (let ((pair (car lst)))
+		 (if (eql key (car pair))
+			 pair
+			 (our-assoc key (cdr lst))))))
+			  
