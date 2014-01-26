@@ -186,9 +186,20 @@
 	  (cons n elt)))
 
 ;; 这里还得看一下 list 函数的原理！
-;; ex8
 
 
+;; ex8 CL-USER> (showdots '(a b c))  ==>  (A . (B . (C . nil)))
+(defun showdots (lst)
+  (if (null lst)
+	  (format t "nil")
+	  (if (and (atom lst) (not (null lst)))
+		  (format t "~a" lst)
+		  (progn
+			(format t "(")
+			(showdots (car lst))
+			(format t " . ")
+			(showdots (cdr lst))
+			(format t ")")))))
+		  
 ;; ex9
-		 
-		 
+
