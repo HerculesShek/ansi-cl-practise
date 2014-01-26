@@ -1,3 +1,4 @@
+;; list compress (1 1 0 1 0 0 1)  ==> ((2 1) 0 1 (2 0) 1)
 (defun compress (x)
   (if (consp x)
       (compr (car x) 1 (cdr x))
@@ -7,10 +8,10 @@
   (if (null lst)
       (list (n-elts elt n))
       (let ((next (car lst)))
-	(if (equal elt next)
-	    (compr elt (+ n 1) (cdr lst))
-	    (cons (n-elts elt n) (compr next 1 (cdr lst)))))))
-      
+		(if (equal elt next)
+			(compr elt (+ n 1) (cdr lst))
+			(cons (n-elts elt n) (compr next 1 (cdr lst)))))))
+
 (defun n-elts (elt n)
   (if (> n 1)
       (list n elt)
@@ -21,10 +22,10 @@
   (if (null lst)
       nil
       (let ((elt (car lst))
-	    (rest (uncompress (cdr lst))))
+			(rest (uncompress (cdr lst))))
 	    (if (consp elt)
-		(append (apply #'list-of elt) rest)
-		(cons elt rest)))))
+			(append (apply #'list-of elt) rest)
+			(cons elt rest)))))
 
 (defun list-of (n elt)
   (if (zerop n)
@@ -106,6 +107,88 @@
 		  (cdr (assoc node net))))
 
 
-;; Exercises
+
+;; Exercises 
+
+;; ex2  a and b are lists 
+(defun new-union (a b)
+  (if (null a)
+	  b
+	  (if (null b)
+		  a
+		  (let ((x (copy-list b)))
+			(dolist (e a)
+			  (setf x (remove e x)))
+			(append a x)))))
+
+;; ex3
+(defun occurrences (lst)
+  (if (consp lst)
+	  (let ((occ nil))
+		(dolist (elt lst)
+		  (let ((ac (assoc elt occ)))
+			(if (null ac)
+				(push (cons elt 1) occ)
+				(setf (cdr ac) (+ 1 (cdr ac)))))) ;; 这里的赋值很重要，可以看出ac并不是一个副本！也就是说 let 操作不会返回副本，而是一个引用！
+		(sort occ #'> :key #'cdr))
+	  lst))
+		
+;; ex5
+;; pos+recursive 练习5的递归版本，修改原来的列表，可以通过传入副本来实现不修改
+(defun pos+ (lst)
+  (and (consp lst)
+	   (every #'numberp lst)
+	   (p lst 0))
+  lst)
+(defun p (lst n)
+  (if (consp lst)
+	  (progn
+		(setf (car lst) (+ (car lst) n))
+		(p (cdr lst) (+ n 1)))))
+
+;; pos+iteration 练习5的迭代版本，不修改原来的列表
+(defun pos+i (lst)
+  (and (consp lst)
+	   (every #'numberp lst)
+	   (let ((index 0) (new-list nil))
+		 (dolist (e lst)
+		   (push (+ e index) new-list)
+		   (setf index (+ 1 index)))
+		 (reverse new-list))))
+		   
+;; pos+mapcar 练习5的mapcar版本
+(defun pos+m (lst)
+  (and (consp lst)
+	   (every #'numberp lst)
+	   (let ((ind nil) (l (length lst)))
+		 (do ((i 0 (+ 1 i)))
+			 ((= i l))
+		   (push i ind))
+		 (mapcar #'+ lst (reverse ind)))))
 
 
+
+;; ex7  CL-USER> (dot-compress '(1 1 1 0 1 0 0 1 0)) =>  ((3 . 1) 0 1 (2 . 0) 1 0)
+(defun dot-compress (lst)
+  (if (consp lst)
+	  (dot-compr (car lst) 1 (cdr lst))
+	  lst))
+(defun dot-compr (elt n lst)
+  (if (null lst)
+	  (list (dot-n-elts elt n))
+	  (let ((next (car lst)))
+		(if (eql next elt)
+			(dot-compr elt (+ n 1) (cdr lst))
+			(cons (dot-n-elts elt n) (dot-compr (car lst) 1 (cdr lst)))))))
+(defun dot-n-elts (elt n)
+  (if (= 1 n)
+	  elt
+	  (cons n elt)))
+
+;; 这里还得看一下 list 函数的原理！
+;; ex8
+
+
+;; ex9
+		 
+		 
