@@ -73,7 +73,7 @@
 
 
 (defun our-reverse (lst)
-  (let ((acc nil))
+  (let ((acc)) ;; 这么写就是acc设为nil
 	(dolist (elt lst)
 	  (push elt acc))
 	acc))
@@ -92,7 +92,7 @@
 
 (defun bfs (end queue net)
   (if (null queue)
-	  nil
+	  nil  ;; 此处 (null queue) nil 可以去掉
 	  (let ((path (car queue)))
 		(let ((node (car path)))
 		  (if (equal end node)
@@ -124,7 +124,7 @@
 ;; ex3
 (defun occurrences (lst)
   (if (consp lst)
-	  (let ((occ nil))
+	  (let ((occ))
 		(dolist (elt lst)
 		  (let ((ac (assoc elt occ)))
 			(if (null ac)
@@ -202,4 +202,12 @@
 			(format t ")")))))
 		  
 ;; ex9
+(defun longest-path (start end net)
+  (bfs end (list (list start)) net))
 
+(defun bfs (end queue net)
+  (if queue
+	  
+
+(defun new-paths (path node net)
+  
