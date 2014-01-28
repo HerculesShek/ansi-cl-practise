@@ -49,7 +49,7 @@
 		  (cons (my-subst new old (car tree))
 				(my-subst new old (cdr tree))))))
 	  
-
+;; 自定义member-if
 (defun our-member-if (fn lst)
   (and (consp lst)
 	   (if (funcall fn (car lst))
