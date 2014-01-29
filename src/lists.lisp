@@ -56,6 +56,8 @@
 		   lst
 		   (our-member-if fn (cdr lst)))))
 
+
+;; 判断一个列表是不是回文的
 (defun mirror? (s)
   (let ((len (length s)))
     (if (evenp len)
