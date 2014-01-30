@@ -69,6 +69,7 @@
 			   (equal (subseq s 0 mid)
 					  (reverse (subseq s (+ mid 1)))))))))
 
+;; 获取列表中第n个最大的值
 (defun nthmost (n lst)
   (nth (- n 1)
 	   (sort (copy-list lst) #'>)))
