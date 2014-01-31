@@ -74,7 +74,7 @@
   (nth (- n 1)
 	   (sort (copy-list lst) #'>)))
 
-
+;; 反序输出一个列表
 (defun our-reverse (lst)
   (let ((acc)) ;; 这么写就是acc设为nil
 	(dolist (elt lst)
