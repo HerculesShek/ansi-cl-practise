@@ -81,6 +81,7 @@
 	  (push elt acc))
 	acc))
 
+;; 自定义assoc 判断一个关联列表中是否包含指定的键值
 (defun our-assoc (key lst)
   (and (consp lst)
 	   (let ((pair (car lst)))
