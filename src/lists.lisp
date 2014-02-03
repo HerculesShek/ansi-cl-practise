@@ -94,7 +94,7 @@
 (defun shortest-path (start end net)
   (bfs end (list (list start)) net))
 
-(defun bfs (end queue net)
+(defun bfs (end queue net) ;; 核心算法
   (if (null queue)
 	  nil  ;; 此处 (null queue) nil 可以去掉
 	  (let ((path (car queue)))
