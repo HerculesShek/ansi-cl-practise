@@ -106,7 +106,7 @@
 						   (new-paths path node net))
 				   net))))))
 
-(defun new-paths (path node net)
+(defun new-paths (path node net) ;; 功能函数
   (mapcar #'(lambda (x) (cons x path))
 		  (cdr (assoc node net))))
 
