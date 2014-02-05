@@ -17,7 +17,7 @@
       (list n elt)
       elt))
 
-
+;; 解压
 (defun uncompress (lst)
   (if (null lst)
       nil
