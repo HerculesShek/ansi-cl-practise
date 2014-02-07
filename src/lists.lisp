@@ -114,7 +114,7 @@
 
 ;; Exercises 
 
-;; ex2  a and b are lists 
+;; ex2  a and b are lists 返回a b的并集
 (defun new-union (a b)
   (if (null a)
 	  b
