@@ -10,7 +10,7 @@
       (let ((next (car lst)))
 		(if (equal elt next)
 			(compr elt (+ n 1) (cdr lst))
-			(cons (n-elts elt n) (compr next 1 (cdr lst)))))))
+			(cons (n-elts elt n) (compr next 1 (cdr lst))))))) ;; cons的第二个参数是list的话，就是把第一个参数添加到这个列表的开头
 
 (defun n-elts (elt n)
   (if (> n 1)
