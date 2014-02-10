@@ -92,7 +92,7 @@
 
 (defun bfs (end queue net)
   (if (null queue)
-	  nil  ;; 此处 (null queue) nil 可以去掉
+	  nil  ;; 此处 (null queue) nil 可以去掉 用queue来代替即可
 	  (let ((path (car queue)))
 		(let ((node (car path)))
 		  (if (equal end node)
@@ -207,6 +207,15 @@
 
 (defun bfs (end queue net)
   (if queue
+	  (let ((path (car queue)) (res))
+		(let ((node (car path)))
+		  (if (eql node end)
+			  (progn
+				(push (reverse path) res)
+				(bfs end (cdr queue) net))
+			  (bfs end (append)
+			  
+			  
 	  
 
 (defun new-paths (path node net)
