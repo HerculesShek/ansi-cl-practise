@@ -17,7 +17,7 @@
       (list n elt)
       elt))
 
-
+;; 解压
 (defun uncompress (lst)
   (if (null lst)
       nil
@@ -49,13 +49,15 @@
 		  (cons (my-subst new old (car tree))
 				(my-subst new old (cdr tree))))))
 	  
-
+;; 自定义member-if
 (defun our-member-if (fn lst)
   (and (consp lst)
 	   (if (funcall fn (car lst))
 		   lst
 		   (our-member-if fn (cdr lst)))))
 
+
+;; 判断一个列表是不是回文的
 (defun mirror? (s)
   (let ((len (length s)))
     (if (evenp len)
@@ -67,17 +69,19 @@
 			   (equal (subseq s 0 mid)
 					  (reverse (subseq s (+ mid 1)))))))))
 
+;; 获取列表中第n个最大的值
 (defun nthmost (n lst)
   (nth (- n 1)
 	   (sort (copy-list lst) #'>)))
 
-
+;; 反序输出一个列表
 (defun our-reverse (lst)
   (let ((acc)) ;; 这么写就是acc设为nil
 	(dolist (elt lst)
 	  (push elt acc))
 	acc))
 
+;; 自定义assoc 判断一个关联列表中是否包含指定的键值
 (defun our-assoc (key lst)
   (and (consp lst)
 	   (let ((pair (car lst)))
@@ -90,7 +94,7 @@
 (defun shortest-path (start end net)
   (bfs end (list (list start)) net))
 
-(defun bfs (end queue net)
+(defun bfs (end queue net) ;; 核心算法
   (if (null queue)
 	  nil  ;; 此处 (null queue) nil 可以去掉 用queue来代替即可
 	  (let ((path (car queue)))
@@ -102,7 +106,7 @@
 						   (new-paths path node net))
 				   net))))))
 
-(defun new-paths (path node net)
+(defun new-paths (path node net) ;; 功能函数
   (mapcar #'(lambda (x) (cons x path))
 		  (cdr (assoc node net))))
 
@@ -110,7 +114,7 @@
 
 ;; Exercises 
 
-;; ex2  a and b are lists 
+;; ex2  a and b are lists 返回a b的并集
 (defun new-union (a b)
   (if (null a)
 	  b
