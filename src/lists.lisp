@@ -10,7 +10,7 @@
       (let ((next (car lst)))
 		(if (equal elt next)
 			(compr elt (+ n 1) (cdr lst))
-			(cons (n-elts elt n) (compr next 1 (cdr lst))))))) ;; cons的第二个参数是list的话，就是把第一个参数添加到这个列表的开头
+			(cons (n-elts elt n) (compr next 1 (cdr lst))))))) ;; 如果cons的第二个参数是list的话，就是把第一个参数添加到这个列表的开头
 
 (defun n-elts (elt n)
   (if (> n 1)
@@ -24,7 +24,7 @@
       (let ((elt (car lst))
 			(rest (uncompress (cdr lst))))
 	    (if (consp elt)
-			(append (apply #'list-of elt) rest)
+			(append (apply #'list-of elt) rest) ;; 这里的apply的传参很灵活
 			(cons elt rest)))))
 
 (defun list-of (n elt)
@@ -113,8 +113,8 @@
 
 
 ;; Exercises 
-
-;; ex2  a and b are lists 返回a b的并集
+;;; ex1 ...
+;; ex2  a and b are lists 返回a b的并集，保持a的顺序
 (defun new-union (a b)
   (if (null a)
 	  b
@@ -133,13 +133,15 @@
 		  (let ((ac (assoc elt occ)))
 			(if (null ac)
 				(push (cons elt 1) occ)
-				(setf (cdr ac) (+ 1 (cdr ac)))))) ;; 这里的赋值很重要，可以看出ac并不是一个副本！也就是说 let 操作不会返回副本，而是一个引用！
+				(setf (cdr ac) (+ 1 (cdr ac)))))) ;; 这里的赋值很重要，可以看出ac并不是一个副本！也就是说let操作不会返回副本，而是一个引用！
 		(sort occ #'> :key #'cdr))
 	  lst))
 		
+;; ex4 因为member默认使用的是eql比较规则
 ;; ex5
-;; pos+recursive 练习5的递归版本，修改原来的列表，可以通过传入副本来实现不修改
-(defun pos+ (lst)
+;; (a) pos+recursive 练习5的递归版本，修改原来的列表，可以通过传入副本来实现不修改
+;; a-v1 修改原来的列表
+(defun pos+ (lst) 
   (and (consp lst)
 	   (every #'numberp lst)
 	   (p lst 0))
@@ -149,8 +151,21 @@
 	  (progn
 		(setf (car lst) (+ (car lst) n))
 		(p (cdr lst) (+ n 1)))))
+;; a-v2 不修改原来的列表
+(defun pos+ (lst) 
+  (let ((llst (copy-list lst)))
+	(and (consp llst)
+		 (every #'numberp lst)
+		 (p llst 0))
+	llst))
+(defun p (lst n)
+  (if (consp lst)
+	  (progn
+		(setf (car lst) (+ (car lst) n))
+		(p (cdr lst) (+ n 1)))))
 
-;; pos+iteration 练习5的迭代版本，不修改原来的列表
+;; (b) pos+iteration 练习5的迭代版本，不修改原来的列表
+;; b-v1
 (defun pos+i (lst)
   (and (consp lst)
 	   (every #'numberp lst)
@@ -160,7 +175,8 @@
 		   (setf index (+ 1 index)))
 		 (reverse new-list))))
 		   
-;; pos+mapcar 练习5的mapcar版本
+;; (c) pos+mapcar 练习5的mapcar版本
+;; c-v1
 (defun pos+m (lst)
   (and (consp lst)
 	   (every #'numberp lst)
@@ -171,7 +187,7 @@
 		 (mapcar #'+ lst (reverse ind)))))
 
 
-
+;;; ex6 ...
 ;; ex7  CL-USER> (dot-compress '(1 1 1 0 1 0 0 1 0)) =>  ((3 . 1) 0 1 (2 . 0) 1 0)
 (defun dot-compress (lst)
   (if (consp lst)
@@ -188,39 +204,40 @@
   (if (= 1 n)
 	  elt
 	  (cons n elt)))
-
 ;; 这里还得看一下 list 函数的原理！
 
 
 ;; ex8 CL-USER> (showdots '(a b c))  ==>  (A . (B . (C . nil)))
 (defun showdots (lst)
-  (if (null lst)
-	  (format t "nil")
-	  (if (and (atom lst) (not (null lst)))
-		  (format t "~a" lst)
-		  (progn
-			(format t "(")
-			(showdots (car lst))
-			(format t " . ")
-			(showdots (cdr lst))
-			(format t ")")))))
+  (if (atom lst)
+	  (format t "~a" lst)
+	  (progn
+		(format t "(")
+		(showdots (car lst))
+		(format t " . ")
+		(showdots (cdr lst))
+		(format t ")"))))
 		  
 ;; ex9
 (defun longest-path (start end net)
-  (bfs end (list (list start)) net))
+  (bfs end (list (list start)) nil net))
 
-(defun bfs (end queue net)
+(defun bfs (end queue res net)
   (if queue
-	  (let ((path (car queue)) (res))
+	  (let ((path (car queue)))
 		(let ((node (car path)))
 		  (if (eql node end)
 			  (progn
 				(push (reverse path) res)
-				(bfs end (cdr queue) net))
-			  (bfs end (append)
+				(bfs end (cdr queue) res net))
+			  (bfs end (append (cdr queue) (new-paths path node net)) res net))))
+	  (if res
+		  (progn
+			(sort res #'> :key #'length)
+			(pop res)))))
 			  
-			  
-	  
-
 (defun new-paths (path node net)
+  (mapcar #'(lambda (x) (adjoin x path)) (assoc node net)))
+	
+  
   
