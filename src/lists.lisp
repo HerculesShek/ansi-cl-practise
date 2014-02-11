@@ -136,8 +136,9 @@
 				(setf (cdr ac) (+ 1 (cdr ac)))))) ;; 这里的赋值很重要，可以看出ac并不是一个副本！也就是说let操作不会返回副本，而是一个引用！
 		(sort occ #'> :key #'cdr))
 	  lst))
-		
-;; ex4 因为member默认使用的是eql比较规则
+;; 上面的 (setf (cdr ac) (+ 1 (cdr ac))) 是可以写成 (incf (cdr ac)) incf 函数的作用就是让某个变量的值加1 而decf则是减1
+
+;; ex4 因为member默认使用的是eql比较规则 :test #'equal
 ;; ex5
 ;; (a) pos+recursive 练习5的递归版本，修改原来的列表，可以通过传入副本来实现不修改
 ;; a-v1 修改原来的列表
@@ -185,7 +186,10 @@
 			 ((= i l))
 		   (push i ind))
 		 (mapcar #'+ lst (reverse ind)))))
-
+;; c-v2
+(defun pos+m (lst)
+  (let ((i -1))
+	(mapcar #'(lambda (x) (+ x (incf i))) lst)))
 
 ;;; ex6 ...
 ;; ex7  CL-USER> (dot-compress '(1 1 1 0 1 0 0 1 0)) =>  ((3 . 1) 0 1 (2 . 0) 1 0)
@@ -233,13 +237,12 @@
 			  (bfs end (append (cdr queue) (new-paths path node net)) res net))))
 	  (if res
 		  (car (sort res #'> :key #'length)))))
-			  
+
 (defun new-paths (path node net)
   ;; (let ((nodes (cdr (assoc node net))))
-  (remove nil (mapcar #'(lambda (x)
-						  (if (member x path)
-							  nil
-							  (cons x path)))
+  (remove nil (mapcar #'(lambda (x) (if (member x path)
+										nil
+										(cons x path)))
 					  (cdr (assoc node net)))))
 	
   
