@@ -232,13 +232,15 @@
 				(bfs end (cdr queue) res net))
 			  (bfs end (append (cdr queue) (new-paths path node net)) res net))))
 	  (if res
-		  (progn
-			(sort res #'> :key #'length)
-			(pop res)))))
+		  (car (sort res #'> :key #'length)))))
 			  
 (defun new-paths (path node net)
   ;; (let ((nodes (cdr (assoc node net))))
-  (mapcar #'(lambda (x) (adjoin x path)) (assoc node net)))
+  (remove nil (mapcar #'(lambda (x)
+						  (if (member x path)
+							  nil
+							  (cons x path)))
+					  (cdr (assoc node net)))))
 	
   
   
