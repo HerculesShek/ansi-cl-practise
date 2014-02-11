@@ -237,6 +237,7 @@
 			(pop res)))))
 			  
 (defun new-paths (path node net)
+  ;; (let ((nodes (cdr (assoc node net))))
   (mapcar #'(lambda (x) (adjoin x path)) (assoc node net)))
 	
   
