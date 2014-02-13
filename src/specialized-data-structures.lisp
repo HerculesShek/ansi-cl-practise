@@ -222,6 +222,27 @@
 	  (append (bst-ordered-list (node-r bst))
 			  (list (node-elt bst))
 			  (bst-ordered-list (node-l bst)))))
+;; labels and ex4-v2 ex4-v3
+;; labels
+(defun recursive-times (k n)
+  (labels ((temp (n) 
+			 (if (zerop n) 0 (+ k (temp (1- n))))))
+	(temp n)))
+;; ex4-v2
+(defun bst->list (bst0)
+  (labels ((rec (bst1 acc)
+             (if bst1
+                 (rec (node-r bst1) (cons (node-elt bst1) (rec (node-l bst1) acc)))
+				 acc)))
+    (rec bst0 nil)))
+;; ex4-v3
+(defun bst->lst (bst0)
+  (labels ((rec (bst1 acc)
+             (if bst1
+                 (rec (node-l bst1) (append (rec (node-r bst1) acc) (list (node-elt bst1))))
+				 acc)))
+    (rec bst0 nil)))
+
 
 ;; ex5 上面的 bst-insert 与 bst-adjoin 功能一样
 ;; ex6
@@ -245,8 +266,3 @@
 	(maphash #'(lambda (k v) (push (cons k v) acc)) ht)
 	acc))
 
-;; labels
- (defun recursive-times (k n)
-   (labels ((temp (n) 
-              (if (zerop n) 0 (+ k (temp (1- n))))))
-     (temp n)))
