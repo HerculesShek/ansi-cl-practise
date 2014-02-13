@@ -111,3 +111,100 @@
 (defun bst-max (bst)
   (and bst
 	   (or (bst-max (node-r bst)) bst)))
+;; remove min
+(defun bst-remove-min (bst)
+  (if (null (node-l bst))
+	  (node-r bst)
+	  (make-node :elt (node-elt bst)
+				  :l (bst-remove-min (node-l bst))
+				  :r (node-r bst))))
+;; remove max 
+(defun bst-remove-max (bst)
+  (if (null (node-r bst))
+	  (node-l bst)
+	  (make-node :elt (node-elt bst)
+				 :l (node-l bst)
+				 :r (bst-remove-max (node-r bst)))))
+
+(defun bst-remove (obj bst <)
+  (if bst
+	  (let ((elt (node-elt bst)))
+		(if (eql obj elt)
+			(percolate bst)
+			(if (funcall < obj elt)
+				(make-node :elt elt
+						   :l (bst-remove obj (node-l bst) <)
+						   :r (node-r bst))
+				(make-node :elt elt
+						   :l (node-l bst)
+						   :r (bst-remove obj (node-r bst) <)))))))
+(defun percolate (bst)
+  (let ((l (node-l bst)) (r (node-r bst)))
+	(cond ((null l) r)
+		  ((null r) l)
+		  (t (if (zerop (random 2))
+				 (make-node :elt (node-elt (bst-max l))
+							:l (bst-remove-max l)
+							:r r)
+				 (make-node :elt (node-elt (bst-max r))
+							:l l
+							:r (bst-remove-min r)))))))
+
+;; print 
+(defun print-bst (bst)
+  (if bst
+	  (progn
+	  (format t "~A <--~A--> ~A~%" (node-l bst) bst (node-r bst))
+	  (print-bst (node-l bst))
+	  (print-bst (node-r bst)))))
+;; 中序输出 排序
+(defun bst-traverse (fn bst)
+  (when bst
+	(bst-traverse fn (node-l bst))
+	(funcall fn (node-elt bst))
+	(bst-traverse fn (node-r bst))))
+
+
+;; Exercises
+;; ex1
+;; 这里主要是找到一个规律
+;; 思路是在旋转的时候把原来的一个整行当作一个整体考虑
+;; 坐标的值：顺时针旋转一个正方的二维数组的话，原来的列坐标变为现在的行坐标
+;; 行数-1-原来的列坐标变为现在的行坐标 即可 
+;; 逆时针则调换
+(defun quarter-turn (arr)
+  (and arr
+	  (let ((dim (array-dimensions arr)))
+		(let ((d (car dim))
+			  (new-arr (make-array dim)))
+			  (do ((i 0 (incf i))) ((= i d))
+				(do ((j 0 (incf j))) ((= j d))
+				  (setf (aref new-arr j (- d 1 i)) (aref arr i j))))
+		  new-arr))))
+			  
+;; ex2 
+;; a
+(defun my-copy-list (lst)
+  (reduce #'(lambda (lst obj) (append lst (list obj))) lst :initial-value nil))
+(defun my-copy-list (lst)
+  (reduce #'cons lst :from-end t :initial-value nil)) 
+;; b
+(defun my-reverse (lst)
+	(reduce #'(lambda (lst obj) (cons obj lst)) lst :initial-value nil))
+
+;; ex3
+(defstruct my-node
+  elt 
+  left
+  middle
+  right)
+
+(defun copy-tree-ex3 (t)
+  (and t
+	   (make-my-node :elt ()
+					 :left ()
+					 :middle ()
+					 :right ()
+;; ex5 上面的 bst-insert 与 bst-adjoin 功能一样
+;; ex6
+ 
