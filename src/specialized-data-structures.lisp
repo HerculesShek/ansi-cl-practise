@@ -186,8 +186,11 @@
 ;; a
 (defun my-copy-list (lst)
   (reduce #'(lambda (lst obj) (append lst (list obj))) lst :initial-value nil))
-(defun my-copy-list (lst)
+(defun my-copy-list-c (lst)
   (reduce #'cons lst :from-end t :initial-value nil)) 
+;; (reduce #'(lambda (a lst) (cons a lst)) '(a b c) :from-end t :initial-value nil)
+;; 从此处看出，默认是左结合，加入 :from-end t 之后，变为了右结合，这时候要注意上面lambda中的参数的顺序
+
 ;; b
 (defun my-reverse (lst)
 	(reduce #'(lambda (lst obj) (cons obj lst)) lst :initial-value nil))
@@ -199,12 +202,51 @@
   middle
   right)
 
-(defun copy-tree-ex3 (t)
-  (and t
-	   (make-my-node :elt ()
-					 :left ()
-					 :middle ()
-					 :right ()
+(defun copy-tree-ex3 (tree)
+  (and tree
+	   (make-my-node :elt (my-node-elt tree)
+					 :left (my-node-left tree)
+					 :middle (my-node-middle tree)
+					 :right (my-node-right tree))))
+(defun value-test (obj tree)
+  (if tree
+	  (or
+	   (eql (my-node-elt tree) obj)
+	   (value-test (my-node-left tree) obj)
+	   (value-test (my-node-middle tree) obj)
+	   (value-test (my-node-right tree) obj))))
+
+;; ex4
+(defun bst-ordered-list (bst)
+  (if bst
+	  (append (bst-ordered-list (node-r bst))
+			  (list (node-elt bst))
+			  (bst-ordered-list (node-l bst)))))
+
 ;; ex5 上面的 bst-insert 与 bst-adjoin 功能一样
 ;; ex6
- 
+;; a
+(defun assoc->hash (a)
+  (if a
+	  (let ((h (make-hash-table)))
+		(dolist (e a)
+		  (setf (gethash (car e) h) (cdr e)))
+		h)))
+;; b
+(defun hash->assoc (h)
+  (if h
+	  (let ((lst nil))
+		(maphash #'(lambda (k v)
+					 (setf lst (cons (cons k v) lst)))
+				 h)
+		lst)))
+(defun hash->lst (ht)
+  (let ((acc nil))
+	(maphash #'(lambda (k v) (push (cons k v) acc)) ht)
+	acc))
+
+;; labels
+ (defun recursive-times (k n)
+   (labels ((temp (n) 
+              (if (zerop n) 0 (+ k (temp (1- n))))))
+     (temp n)))
