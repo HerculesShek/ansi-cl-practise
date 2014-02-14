@@ -22,7 +22,7 @@
   (if (null lst)
       nil
       (let ((elt (car lst))
-			(rest (uncompress (cdr lst))))
+			(rest (uncompress (cdr lst)))) ;; 这里的这种递归方式是不是就是尾递归？
 	    (if (consp elt)
 			(append (apply #'list-of elt) rest) ;; 这里的apply的传参很灵活
 			(cons elt rest)))))
@@ -244,6 +244,3 @@
 										nil
 										(cons x path)))
 					  (cdr (assoc node net)))))
-	
-  
-  
