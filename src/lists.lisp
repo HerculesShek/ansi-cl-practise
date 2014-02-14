@@ -116,14 +116,10 @@
 ;;; ex1 ...
 ;; ex2  a and b are lists 返回a b的并集，保持a的顺序
 (defun new-union (a b)
-  (if (null a)
-	  b
-	  (if (null b)
-		  a
-		  (let ((x (copy-list b)))
-			(dolist (e a)
-			  (setf x (remove e x)))
-			(append a x)))))
+  (let ((x (copy-list b)))
+	(dolist (e a)
+	  (setf x (remove e x)))
+	(append a x)))
 
 ;; ex3
 (defun occurrences (lst)
