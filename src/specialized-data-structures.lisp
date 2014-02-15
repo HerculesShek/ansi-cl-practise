@@ -75,7 +75,7 @@
 ;; BST
 ;; node 
 (defstruct (node (:print-function
-				  (lambda (node s d)
+				  (lambda (node s d) ;; 定义结构时指定打印函数的时候，这个函数必须是接受三个参数的
 					(format s "#<~A>" (node-elt node)))))
   elt
   (l nil)
@@ -85,7 +85,7 @@
   (if (null bst)
 	  (make-node :elt obj)
 	  (let ((elt (node-elt bst)))
-		(if (eql elt obj)
+		(if (eql elt obj) ;; 已经存在此元素则不再插入
 			bst
 			(if (funcall < obj elt)
 				(make-node :elt elt
@@ -142,7 +142,7 @@
   (let ((l (node-l bst)) (r (node-r bst)))
 	(cond ((null l) r)
 		  ((null r) l)
-		  (t (if (zerop (random 2))
+		  (t (if (zerop (random 2)) ;; 在这里随机的选择前驱或者是后继来代替
 				 (make-node :elt (node-elt (bst-max l))
 							:l (bst-remove-max l)
 							:r r)
@@ -152,11 +152,10 @@
 
 ;; print 
 (defun print-bst (bst)
-  (if bst
-	  (progn
-	  (format t "~A <--~A--> ~A~%" (node-l bst) bst (node-r bst))
-	  (print-bst (node-l bst))
-	  (print-bst (node-r bst)))))
+  (when bst
+	(format t "~A <--~A--> ~A~%" (node-l bst) bst (node-r bst))
+	(print-bst (node-l bst))
+	(print-bst (node-r bst))))
 ;; 中序输出 排序
 (defun bst-traverse (fn bst)
   (when bst
@@ -174,14 +173,14 @@
 ;; 逆时针则调换上面两条原则即可
 (defun quarter-turn (arr)
   (and arr
-	  (let ((dim (array-dimensions arr)))
-		(let ((d (car dim))
-			  (new-arr (make-array dim)))
-			  (do ((i 0 (incf i))) ((= i d))
-				(do ((j 0 (incf j))) ((= j d))
-				  (setf (aref new-arr j (- d 1 i)) (aref arr i j))))
-		  new-arr))))
-			  
+	   (let ((dim (array-dimensions arr)))
+		 (let ((d (car dim))
+			   (new-arr (make-array dim)))
+		   (do ((i 0 (incf i))) ((= i d))
+			 (do ((j 0 (incf j))) ((= j d))
+			   (setf (aref new-arr j (- d 1 i)) (aref arr i j))))
+		   new-arr))))
+
 ;; ex2 
 ;; a
 (defun my-copy-list (lst)
@@ -216,7 +215,7 @@
 	   (value-test (my-node-middle tree) obj)
 	   (value-test (my-node-right tree) obj))))
 
-;; ex4
+;; ex4-v1
 (defun bst-ordered-list (bst)
   (if bst
 	  (append (bst-ordered-list (node-r bst))
@@ -253,7 +252,7 @@
 		(dolist (e a)
 		  (setf (gethash (car e) h) (cdr e)))
 		h)))
-;; b
+;; b-v1
 (defun hash->assoc (h)
   (if h
 	  (let ((lst nil))
@@ -261,6 +260,7 @@
 					 (setf lst (cons (cons k v) lst)))
 				 h)
 		lst)))
+;; b-v2
 (defun hash->lst (ht)
   (let ((acc nil))
 	(maphash #'(lambda (k v) (push (cons k v) acc)) ht)
