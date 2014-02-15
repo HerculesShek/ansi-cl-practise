@@ -4,15 +4,15 @@
 	(and (not (zerop len))
 		 (finder obj vec 0 (- len 1)))))
 
-(defun finder (obj vec start end)
+(defun finder (obj vec start end) ;; 闭区间
   (let ((range (- end start)))
-	(if (zerop range)
+	(if (zerop range) ;; 区间内只有一个元素
 		(if (eql obj (svref vec start))
 			obj
 			nil)
 		(let ((mid (+ start (round (/ range 2)))))
 		  (let ((obj2 (svref vec mid)))
-			(if (> obj obj2)
+			(if (> obj obj2)  ;; 其实这里用cond比较好
 				(finder obj vec (+ mid 1) end)
 				(if (< obj obj2)
 					(finder obj vec start (- mid 1))
