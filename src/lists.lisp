@@ -144,10 +144,9 @@
 	   (p lst 0))
   lst)
 (defun p (lst n)
-  (if (consp lst)
-	  (progn
-		(setf (car lst) (+ (car lst) n))
-		(p (cdr lst) (+ n 1)))))
+  (when lst
+	(setf (car lst) (+ (car lst) n))
+	(p (cdr lst) (+ n 1))))
 ;; a-v2 不修改原来的列表
 (defun pos+ (lst) 
   (let ((llst (copy-list lst)))
@@ -155,11 +154,6 @@
 		 (every #'numberp lst)
 		 (p llst 0))
 	llst))
-(defun p (lst n)
-  (if (consp lst)
-	  (progn
-		(setf (car lst) (+ (car lst) n))
-		(p (cdr lst) (+ n 1)))))
 
 ;; (b) pos+iteration 练习5的迭代版本，不修改原来的列表
 ;; b-v1
@@ -171,7 +165,7 @@
 		   (push (+ e index) new-list)
 		   (setf index (+ 1 index)))
 		 (reverse new-list))))
-		   
+
 ;; (c) pos+mapcar 练习5的mapcar版本
 ;; c-v1
 (defun pos+m (lst)
