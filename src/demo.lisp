@@ -12,4 +12,13 @@
   (labels-test))
   
 (defun re-test()
-  (return re-test 'a))
+  (return-from re-test 'a))
+
+(defun let-test()
+  (let ((x 'a))
+	(if (member x l)
+		x)))
+
+(defun a()
+  (setf l '(a b c))
+  (let-test))

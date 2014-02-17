@@ -44,7 +44,7 @@
 			  (t (format nil "a(n) ~(~A~)" (type-of x))))))
 
 
-(defun let-test ()
+(defun do-test ()
   (let ((x 'a))
 	(do ((x 1 (+ x 1))
 		 (y x x))
@@ -53,17 +53,36 @@
 	x))
 
 
-(defun let-test-1 () 
+(defun do-test-1 () 
   (do ((m 1 (+ m 1))
 	   (n m m)) ;; ERROR! 没有m的定义！
 	  ((> m 5))
 	(format t "(~A ~A) " m n)))
 
 
-(defun let-test-2 ()
-  (do ((x 1 (incf x))
-	   (y x x))
-	  ((> x 5))
-	(format t "(~A ~A) " x y))
-  x)
+(defun do-test-2 ()
+  (let ((x 'a))
+	(do ((x 1 (incf x))
+		 (y x x))
+		((> x 5))
+	  (format t "(~A ~A) " x y))
+	x))
 
+
+(defun do*-test ()
+  (do* ((x 1 (+ y 1))
+		(y x (+ 1 x)))
+	   ((> x 5))
+	(format t "(~A ~A) " x y)))
+
+(defun do*-test-1 ()
+  (do* ((y x (+ 1 x)) ;; 错误！因为是顺序执行的 
+		(x 1 (+ y 1)))
+	   ((> x 5))
+	(format t "(~A ~A) " x y)))
+
+(defun mapc-test()
+  (mapc #'(lambda (x y)
+			(format t "~A ~A" x y))
+		'(hip flip slip)
+		'(hop flop slop)))
