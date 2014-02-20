@@ -268,7 +268,7 @@
 		   flag))))
 ;; 7 (c)
 (defun compare-pair-mapc (lst)
-  
+  (mapc #
 
 ;; function variable context test
 (defun let-name ()
