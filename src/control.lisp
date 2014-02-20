@@ -258,14 +258,17 @@
 			   (compare-pair-recur (cdr lst))))))
 ;; 7 (b)
 (defun compare-pair-do (lst)
-  (if (listp lst)
-	  (do (
-		   (ll lst (cdr ll))
-		   (flag (= 1 (abs (- e (car ll))))))
+  (if (and (listp lst)
+		   (< 1 (length lst)))
+	  (do ((ll (cdr lst) (cdr ll))
+		   (flag (= 1 (abs (- (car lst) (cadr lst))))
+				 (= 1 (abs (- (cadr ll) (car ll))))))
 		  ((or (not flag)
 			   (null (cdr ll)))
 		   flag))))
-
+;; 7 (c)
+(defun compare-pair-mapc (lst)
+  
 
 ;; function variable context test
 (defun let-name ()
