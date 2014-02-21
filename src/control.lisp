@@ -270,6 +270,16 @@
 (defun compare-pair-mapc (lst)
   (mapc #
 
+
+;; 8
+(defun extrame (v)
+  (extrame-exc 0 (length v) v (svref v 0) (svref v 0)))
+(defun extrame-exc (i n v min max)
+  (if (= i n)
+	  (values min max)
+	  (let ((curr (svref v i)))
+		(extrame-exc (incf i) n v (if (< curr min) curr min) (if (> curr max) curr max)))))
+
 ;; function variable context test
 (defun let-name ()
   (let ((name "orig"))
