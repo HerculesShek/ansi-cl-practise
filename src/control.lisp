@@ -268,9 +268,15 @@
 		   flag))))
 ;; 7 (c)
 (defun compare-pair-mapc (lst)
-  (mapc #
-
-
+  (and (not (null lst))
+	   (block nil
+		 (let ((curr (car lst)))
+		   (mapc #'(lambda (x)
+					 (if (= 1 (abs (- curr x)))
+						 (setf curr x)
+						 (return nil)))
+				 (cdr lst))
+		   t))))
 ;; 8
 (defun extrame (v)
   (extrame-exc 0 (length v) v (svref v 0) (svref v 0)))
@@ -280,6 +286,11 @@
 	  (let ((curr (svref v i)))
 		(extrame-exc (incf i) n v (if (< curr min) curr min) (if (> curr max) curr max)))))
 
+
+
+
+
+;;; Other Demo fo Lisp research
 ;; function variable context test
 (defun let-name ()
   (let ((name "orig"))
