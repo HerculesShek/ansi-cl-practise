@@ -285,7 +285,9 @@
 	  (values min max)
 	  (let ((curr (svref v i)))
 		(extrame-exc (incf i) n v (if (< curr min) curr min) (if (> curr max) curr max)))))
-
+;; 9
+(defun shortest-path (start end net)
+  
 
 
 
