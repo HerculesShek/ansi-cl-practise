@@ -285,8 +285,15 @@
 	  (values min max)
 	  (let ((curr (svref v i)))
 		(extrame-exc (incf i) n v (if (< curr min) curr min) (if (> curr max) curr max)))))
-;; 9
+;; 9 version of catch and throw
 (defun shortest-path (start end net)
+  (and (consp net)
+	   (if (eql start end)
+		   (list start)
+		   (catch 'found
+			 (bfs end (list (list start)) net)))))
+
+(defun bfs (end queue net)
   
 
 
