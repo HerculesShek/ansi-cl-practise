@@ -292,11 +292,23 @@
 		   (list start)
 		   (catch 'found
 			 (bfs end (list (list start)) net)))))
-
-(defun bfs (end queue net)
   
+(defun bfs (end queue net)
+  (if (null queue)
+      nil
+    (let* ((path (car queue)) (node (car path)))
+      (bfs end
+           (append (cdr queue)
+                   (new-paths path node net end))
+           net))))
 
-
+(defun new-paths (path node net end)
+  (mapcar #'(lambda (n)
+              (let ((path1 (cons n path)))
+                (if (eql n end)
+                    (throw 'found (reverse path1))  
+                  path1)))
+          (cdr (assoc node net))))
 
 
 ;;; Other Demo fo Lisp research
