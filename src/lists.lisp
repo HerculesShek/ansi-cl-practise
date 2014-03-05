@@ -17,7 +17,7 @@
       (list n elt)
       elt))
 
-;; 解压
+;; 解压 (uncompress '((3 r) u (2 0) p (2 t))) => (R R R U 0 0 P T T)
 (defun uncompress (lst)
   (if (null lst)
       nil
@@ -48,7 +48,7 @@
 		  tree
 		  (cons (my-subst new old (car tree))
 				(my-subst new old (cdr tree))))))
-	  
+
 ;; 自定义member-if
 (defun our-member-if (fn lst)
   (and (consp lst)
@@ -61,13 +61,13 @@
 (defun mirror? (s)
   (let ((len (length s)))
     (if (evenp len)
-         (let ((mid (/ len 2)))
-           (equal (subseq s 0 mid)
-                  (reverse (subseq s mid))))
-		 (or (equal len 0)
-			 (let ((mid (/ (- len 1) 2)))
-			   (equal (subseq s 0 mid)
-					  (reverse (subseq s (+ mid 1)))))))))
+		(let ((mid (/ len 2)))
+		  (equal (subseq s 0 mid)
+				 (reverse (subseq s mid))))
+		(or (equal len 0)
+			(let ((mid (/ (- len 1) 2)))
+			  (equal (subseq s 0 mid)
+					 (reverse (subseq s (+ mid 1)))))))))
 
 ;; 获取列表中第n个最大的值
 (defun nthmost (n lst)
@@ -211,7 +211,7 @@
 		(format t " . ")
 		(showdots (cdr lst))
 		(format t ")"))))
-		  
+
 ;; ex9
 (defun longest-path (start end net)
   (bfs end (list (list start)) nil net))
