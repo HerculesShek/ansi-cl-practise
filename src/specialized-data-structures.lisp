@@ -3,11 +3,10 @@
   (let ((len (length vec)))
 	(and (not (zerop len))
 		 (finder obj vec 0 (- len 1)))))
-
-(defun finder (obj vec start end) ;; 闭区间
+(defun finder (obj vec start end) ;; 闭区间 start and end are indexes
   (let ((range (- end start)))
-	(if (zerop range) ;; 区间内只有一个元素
-		(if (eql obj (svref vec start))
+	(if (zerop range) ;; 区间内只有一个元素 base case
+		(if (eql obj (svref vec start)) 
 			obj
 			nil)
 		(let ((mid (+ start (round (/ range 2)))))
@@ -37,7 +36,7 @@
   (let ((p1 (position-if test str :start start)))
 	(if p1
 		(let ((p2 (position-if #'(lambda (c)
-										 (not (funcall test c)))
+								   (not (funcall test c)))
 							   str :start p1)))
 		  (cons (subseq str p1 p2)
 				(if p2
@@ -116,8 +115,8 @@
   (if (null (node-l bst))
 	  (node-r bst)
 	  (make-node :elt (node-elt bst)
-				  :l (bst-remove-min (node-l bst))
-				  :r (node-r bst))))
+				 :l (bst-remove-min (node-l bst))
+				 :r (node-r bst))))
 ;; remove max 
 (defun bst-remove-max (bst)
   (if (null (node-r bst))
@@ -192,7 +191,7 @@
 
 ;; b
 (defun my-reverse (lst)
-	(reduce #'(lambda (lst obj) (cons obj lst)) lst :initial-value nil))
+  (reduce #'(lambda (lst obj) (cons obj lst)) lst :initial-value nil))
 
 ;; ex3
 (defstruct my-node
