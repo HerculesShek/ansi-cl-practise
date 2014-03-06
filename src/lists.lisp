@@ -121,7 +121,7 @@
 	  (setf x (remove e x)))
 	(append a x)))
 
-;; ex3
+;; ex3 返回列表中每个元素出现的次数，并排序 (occurrences '(a b c 1 v a b 4)) => ((B . 2) (A . 2) (4 . 1) (V . 1) (1 . 1) (C . 1))
 (defun occurrences (lst)
   (if (consp lst)
 	  (let ((occ))
@@ -132,9 +132,11 @@
 				(setf (cdr ac) (+ 1 (cdr ac)))))) ;; 这里的赋值很重要，可以看出ac并不是一个副本！也就是说let操作不会返回副本，而是一个引用！
 		(sort occ #'> :key #'cdr))
 	  lst))
+;; 同时，assoc返回的也是个引用，而不是副本，方便修改
 ;; 上面的 (setf (cdr ac) (+ 1 (cdr ac))) 是可以写成 (incf (cdr ac)) incf 函数的作用就是让某个变量的值加1 而decf则是减1
 
 ;; ex4 因为member默认使用的是eql比较规则 :test #'equal
+
 ;; ex5
 ;; (a) pos+recursive 练习5的递归版本，修改原来的列表，可以通过传入副本来实现不修改
 ;; a-v1 修改原来的列表
@@ -145,9 +147,9 @@
   lst)
 (defun p (lst n)
   (when lst
-	(setf (car lst) (+ (car lst) n))
+	(setf (car lst) (+ (car lst) n)) ;; (incf (car lst) n)
 	(p (cdr lst) (+ n 1))))
-;; a-v2 不修改原来的列表
+;; a-v2 不修改原来的列表，传入一个副本即可
 (defun pos+ (lst) 
   (let ((llst (copy-list lst)))
 	(and (consp llst)
@@ -163,10 +165,10 @@
 	   (let ((index 0) (new-list nil))
 		 (dolist (e lst)
 		   (push (+ e index) new-list)
-		   (setf index (+ 1 index)))
+		   (setf index (+ 1 index))) ;; (incf index)
 		 (reverse new-list))))
 
-;; (c) pos+mapcar 练习5的mapcar版本
+;; (c) pos+mapcar
 ;; c-v1
 (defun pos+m (lst)
   (and (consp lst)
@@ -174,10 +176,10 @@
 	   (let ((ind nil) (l (length lst)))
 		 (do ((i 0 (+ 1 i)))
 			 ((= i l))
-		   (push i ind))
+		   (push i ind)) ;; 一个比较笨的存放索引序列的方法
 		 (mapcar #'+ lst (reverse ind)))))
-;; c-v2
-(defun pos+m (lst)
+;; c-v2 相比v1 此版本简洁高效
+(defun pos+mapcar (lst)
   (let ((i -1))
 	(mapcar #'(lambda (x) (+ x (incf i))) lst)))
 
@@ -197,7 +199,7 @@
 (defun dot-n-elts (elt n)
   (if (= 1 n)
 	  elt
-	  (cons n elt)))
+	  (cons n elt))) ;; just change this piece
 ;; 这里还得看一下 list 函数的原理！
 
 
@@ -216,7 +218,7 @@
 (defun longest-path (start end net)
   (bfs end (list (list start)) nil net))
 
-(defun bfs (end queue res net)
+(defun bfs (end queue res net) ;; res stores all the path starting from 'start' and ending with 'end'
   (if queue
 	  (let ((path (car queue)))
 		(let ((node (car path)))
@@ -229,7 +231,6 @@
 		  (car (sort res #'> :key #'length)))))
 
 (defun new-paths (path node net)
-  ;; (let ((nodes (cdr (assoc node net))))
   (remove nil (mapcar #'(lambda (x) (if (member x path)
 										nil
 										(cons x path)))
