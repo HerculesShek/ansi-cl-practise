@@ -22,3 +22,16 @@
 (defun a()
   (setf l '(a b c))
   (let-test))
+
+
+(defun nilt()
+  (dolist (e '(a b c) )
+	(format t "~A" e)
+	(if (eql e 'bb)
+		(return 'aa))))
+
+(defun let*t()
+  (let ((x 1))
+	(let ((y (+ x 1)))
+	  (+ x y))))
+  

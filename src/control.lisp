@@ -125,7 +125,7 @@
 
   
 ;; Date Arithmetic 
-(defconstant month #(0 31 59 90 120 151 181 212 243 273 304 334 365))
+(defconstant month #(0 31 59 90 120 151 181 212 243 273 304 334 365)) ;; 借助这个[start, end)
 (defconstant yzero 2000)
 ;; date -> num 
 (defun day->num (d m y)
@@ -197,7 +197,7 @@
 	  x
 	  (* x x)))
 ;; 4
-(defun month-num-case-svref
+(defun month-num-case-svref(m y)
 	(+ (case m
 		 (1 0)
 		 (2 31)
@@ -228,12 +228,11 @@
 (defun pre (obj v n lst)
   (if (= n (- (length v) 1))
 	  lst
-	  (if (eql obj (elt v (+ 1 n)))
-		  (progn
-			(pushnew (elt v n) lst)
-			(pre obj v (+ n 1) lst))
-		  (pre obj v (+ n 1) lst))))
-;;  6 iteration
+	  (progn 
+		(if (eql obj (elt v (+ 1 n)))
+			(pushnew (elt v n) lst))
+		(pre obj v (+ n 1) lst))))
+;; 6 iteration
 (defun intersperse (obj lst)
   (let ((ll nil))
 	(dolist (e lst)
@@ -245,30 +244,35 @@
   (if (listp lst)
 	  (cons (car lst) (inter obj (cdr lst)))))
 (defun inter (obj lst)
-  (if (null lst)
-	  nil
-	  (append (list obj (car lst)) (inter obj (cdr lst)))))
+  (and lst
+	   (append (list obj (car lst)) (inter obj (cdr lst)))))
 ;; 7 (a)
 (defun compare-pair-recur (lst)
-  (if (null lst)
-	  nil
-	  (if (and (atom (car lst)) (null (cdr lst)))
-		  t
-		  (and (= 1 (abs (- (car lst) (cadr lst))))
-			   (compare-pair-recur (cdr lst))))))
+  (and lst
+	   (every #'numberp lst)
+	   (< 1 (length lst))
+	   (cpr-u lst)))
+(defun cpr-u(lst)
+  (if (null (cdr lst))
+	  t
+	  (and (= 1 (abs (- (car lst) (cadr lst))))
+		   (cpr-u (cdr lst)))))
 ;; 7 (b)
 (defun compare-pair-do (lst)
-  (if (and (listp lst)
-		   (< 1 (length lst)))
-	  (do ((ll (cdr lst) (cdr ll))
-		   (flag (= 1 (abs (- (car lst) (cadr lst))))
-				 (= 1 (abs (- (cadr ll) (car ll))))))
-		  ((or (not flag)
-			   (null (cdr ll)))
-		   flag))))
+  (and (listp lst)
+	   (every #'numberp lst)
+	   (< 1 (length lst))
+	   (do ((ll (cdr lst) (cdr ll))
+			(flag (= 1 (abs (- (car lst) (cadr lst))))
+				  (= 1 (abs (- (car ll) (cadr ll))))))
+		   ((or (not flag)
+				(null (cdr ll)))
+			flag))))
 ;; 7 (c)
 (defun compare-pair-mapc (lst)
-  (and (not (null lst))
+  (and lst
+	   (every #'numberp lst)
+	   (< 1 (length lst))
 	   (block nil
 		 (let ((curr (car lst)))
 		   (mapc #'(lambda (x)
@@ -292,22 +296,22 @@
 		   (list start)
 		   (catch 'found
 			 (bfs end (list (list start)) net)))))
-  
+
 (defun bfs (end queue net)
   (if (null queue)
       nil
-    (let* ((path (car queue)) (node (car path)))
-      (bfs end
-           (append (cdr queue)
-                   (new-paths path node net end))
-           net))))
+	  (let* ((path (car queue)) (node (car path)))
+		(bfs end
+			 (append (cdr queue)
+					 (new-paths path node net end))
+			 net))))
 
 (defun new-paths (path node net end)
   (mapcar #'(lambda (n)
               (let ((path1 (cons n path)))
                 (if (eql n end)
                     (throw 'found (reverse path1))  
-                  path1)))
+					path1)))
           (cdr (assoc node net))))
 
 
