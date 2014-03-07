@@ -74,7 +74,7 @@
 ;; BST
 ;; node 
 (defstruct (node (:print-function
-				  (lambda (node s d) ;; 定义结构时指定打印函数的时候，这个函数必须是接受三个参数的
+				  (lambda (node s d) ;; 定义结构时指定打印函数的时候，这个函数必须是接受三个参数
 					(format s "#<~A>" (node-elt node)))))
   elt
   (l nil)
@@ -168,13 +168,12 @@
 ;; 这里主要是找到一个规律
 ;; 思路是在旋转的时候把原来的一个整行当作一个整体考虑
 ;; 坐标的值：顺时针旋转一个正方的二维数组的话，原来的列坐标变为现在的行坐标
-;; 行数-1-原来的列坐标变为现在的行坐标 即可 
+;; 正方形的行数-1-原来的列坐标变为现在的行坐标 即可 
 ;; 逆时针则调换上面两条原则即可
 (defun quarter-turn (arr)
   (and arr
 	   (let ((dim (array-dimensions arr)))
-		 (let ((d (car dim))
-			   (new-arr (make-array dim)))
+		 (let ((d (car dim)) (new-arr (make-array dim)))
 		   (do ((i 0 (incf i))) ((= i d))
 			 (do ((j 0 (incf j))) ((= j d))
 			   (setf (aref new-arr j (- d 1 i)) (aref arr i j))))
@@ -214,7 +213,7 @@
 	   (value-test (my-node-middle tree) obj)
 	   (value-test (my-node-right tree) obj))))
 
-;; ex4-v1
+;; ex4-v1 注意 ex4要求返回的列表是由大到小
 (defun bst-ordered-list (bst)
   (if bst
 	  (append (bst-ordered-list (node-r bst))
@@ -264,4 +263,4 @@
   (let ((acc nil))
 	(maphash #'(lambda (k v) (push (cons k v) acc)) ht)
 	acc))
-
+;; push is more effective than cons a obj to a list
