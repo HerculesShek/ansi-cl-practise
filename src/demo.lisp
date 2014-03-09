@@ -34,4 +34,6 @@
   (let ((x 1))
 	(let ((y (+ x 1)))
 	  (+ x y))))
+(defun let*t2()
+  ((lambda (x) ((lambda (y) (+ x y)) (+ x 1))) 1))
   
