@@ -306,7 +306,7 @@
 					 (new-paths path node net end))
 			 net))))
 
-(defun new-paths (path node net end)
+(defun new-paths (path node net end) ;; throw when found
   (mapcar #'(lambda (n)
               (let ((path1 (cons n path)))
                 (if (eql n end)
