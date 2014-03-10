@@ -303,7 +303,7 @@
 	  (let* ((path (car queue)) (node (car path)))
 		(bfs end
 			 (append (cdr queue)
-					 (new-paths path node net end))
+					 (new-paths path node net end)) ;; 在函数调用的时候，参数自求值也是可以打断函数调用的！
 			 net))))
 
 (defun new-paths (path node net end) ;; throw when found

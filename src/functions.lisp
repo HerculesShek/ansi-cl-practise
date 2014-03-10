@@ -1,3 +1,4 @@
-;; fboundp
+;; symbol-function
+
 
 ;; labels
