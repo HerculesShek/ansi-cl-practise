@@ -1,13 +1,3 @@
-(defun pseudo-cat (file)
-  (with-open-file (str file :direction :input)
-	(do ((line (read-line str nil 'eof)
-			   (read-line str nil 'eof)))
-		((eql line 'eof))
-	  (format t "~A~%" line))))
-
-(defun read-1()
-  (type-of (read)))
-
 ;; String Substitution -- an execllent example!
 (defstruct buf
   vec (start -1) (used -1) (new -1) (end -1))
@@ -54,7 +44,11 @@
 	(with-open-file (out file2 :direction :output
 						 :if-exists :supersede)
 	  (stream-subst old new in out))))
-
+;; here are 3 wild cards :
+;;    %a -- all char
+;;    %d -- 0-9
+;;    %w -- a-zA-Z and 0-9
+;;    %% -- #\%
 (defun stream-subst (old new in out)
   (let* ((pos 0)
          (len (length old))
@@ -82,45 +76,4 @@
              (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个取出来 这个时候buf中一定是有数据的！并且避免了死循环！
              (setf pos 0))))
     (buf-flush buf out)))
-;; CL-USER> (file-subst "baro" "baric" "a.txt" "b.txt")
-
-
-;; Exercises
-;; ex1
-(defun file-to-lststr(file)
-  (let ((acc nil))
-	(with-open-file (str file :direction :input)
-	  (do ((line (read-line str nil 'eof)
-				 (read-line str nil 'eof)))
-		  ((eql line 'eof))
-		(push line acc)))
-	(reverse acc)))
-;; ex2
-(defun file-to-lstexp(file)
-  (let ((acc nil))
-	(with-open-file (str file :direction :input)
-	  (do ((exp (read str nil 'eof)
-				(read str nil 'eof)))
-		  ((eql exp 'eof))
-		(push exp acc)))
-	(reverse acc)))
-;; ex3
-(defun appendwithoutnotation(file1 file2)
-  (with-open-file (in file2 :direction :input)
-	(with-open-file (out file1 :direction :output
-						 :if-exists :append)
-	  (do ((line (read-line in nil :eof)
-				 (read-line in nil :eof)))
-		  ((eql line :eof))
-		(terpri out)
-		(princ (subseq line 0 (position #\% line)) out)))))
-;; ex4
-(defun print-float-array (farr)
-  (let ((dimens (array-dimensions farr))
-	(dotimes (i (first dimens))
-	  (dotimes (j (second dimens))
-		(format t "~10,2,0,,' F" (aref farr i j)))
-	  (terpri))))
-;; ex5 wildcards "+"   reference the source file input-and-ouput-ex5.lisp
-;; ex6 reference the source file input-and-output-ex6.lisp
 
