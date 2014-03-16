@@ -49,31 +49,59 @@
 ;;    %d -- 0-9
 ;;    %w -- a-zA-Z and 0-9
 ;;    %% -- #\%
-(defun stream-subst (old new in out)
+(defun parse-pattern (patt)
+  (labels ((rec (i len ctrl acc)
+  (if (< i len)
+	  (let* ((c (char patt i))
+			 (ctrl-next (and (not ctrl) (char= c #\%))))
+		(rec (1+ i)
+			 len
+			 ctrl-next
+			 (if ctrl-next
+				 acc
+				 (cons
+				  (if ctrl
+					  (case c
+						(#\a 'all)
+						(#\w 'word)
+						(#\d 'digit)
+						(#\% #\%))
+					  c)
+				  acc))))
+	  (concatenate 'vector (nreverse acc)))))
+	(rec 0 (length patt) nil nil)))
+
+(defun stream-subst (patt new in out)
   (let* ((pos 0)
+		 (old (parse-pattern patt))
          (len (length old))
          (buf (new-buf len))
          (from-buf nil))
     (do ((c (read-char in nil :eof)
-            (or (setf from-buf (buf-next buf))  ;; setf 会返回最后一个参数求值结果
+            (or (setf from-buf (buf-next buf))  
                 (read-char in nil :eof))))
         ((eql c :eof))
-      (cond ((char= c (char old pos))
-             (incf pos)
-             (cond ((= pos len)            ; 3 字符相等 并且 现在是全部相等
-                    (princ new out)
-                    (setf pos 0)
-                    (buf-clear buf))
-                   ((not from-buf)         ; 2 字符相等又不是从buf中获取的。插入buf中，buf中的标位除了end都不动
-                    (buf-insert c buf))))
-            ((zerop pos)                   ; 1 字符至今没有匹配上
-             (princ c out)
-             (when from-buf                ; 如果是从buf中获取的字符，需要pop出并重置
-               (buf-pop buf)))
-            (t                             ; 4 之前有相等的，但是现在不相等了
-             (unless from-buf              ; 如果不是从buf中拿来的字符 需要加入到buf中，修改end
-               (buf-insert c buf))         ; 这里就是为了保留火种！很巧妙，现在暂时不相等以后未必不相等，这个字符说不定和old的第一个字符相等
-             (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个取出来 这个时候buf中一定是有数据的！并且避免了死循环！
-             (setf pos 0))))
-    (buf-flush buf out)))
+	  (let ((c0 (svref old pos)))
+		(cond ((or 
+				(eql c0 'all)
+				(and (eql c0 'word) (or (alpha-char-p c) (digit-char-p c)))
+				(and (eql c0 'digit) (digit-char-p c))
+				(char= c c0))
+			   (incf pos)
+			   (cond ((= pos len)            ; 3 
+					  (princ new out)
+					  (setf pos 0)
+					  (buf-clear buf))
+					 ((not from-buf)         ; 2 
+					  (buf-insert c buf))))
+			  ((zerop pos)                   ; 1 
+			   (princ c out)
+			   (when from-buf               
+				 (buf-pop buf)))
+			  (t                             ; 4 
+			   (unless from-buf             
+				 (buf-insert c buf))        
+			   (princ (buf-pop buf) out)    
+			   (setf pos 0)))))
+	  (buf-flush buf out)))
 
