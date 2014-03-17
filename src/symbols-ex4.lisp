@@ -1,14 +1,10 @@
-(defun pseudo-cat (file)
-  (with-open-file (str file :direction :input)
-	(do ((line (read-line str nil 'eof)
-			   (read-line str nil 'eof)))
-		((eql line 'eof))
-	  (format t "~A~%" line))))
-
-(defun read-1()
-  (type-of (read)))
-
 ;; String Substitution -- an execllent example!
+(defpackage "RING"
+  (:use "COMMON-LISP")
+  (:export "BUF" "BREF" "NEW-BUF" "BUF-INSERT" "BUF-POP" "BUF-NEXT" "BUF-RESET" "BUF-CLEAR" "BUF-FLUSH"))
+
+(in-package ring)
+
 (defstruct buf
   vec (start -1) (used -1) (new -1) (end -1))
 
@@ -49,6 +45,10 @@
 	  ((> i (buf-end b)))
 	(princ (bref b i) str)))
 
+(defpackage "FILE"
+  (:use "COMMON-LISP" "RING"))
+(in-package file)
+
 (defun file-subst (old new file1 file2)
   (with-open-file (in file1 :direction :input)
 	(with-open-file (out file2 :direction :output
@@ -74,53 +74,13 @@
                     (buf-insert c buf))))
             ((zerop pos)                   ; 1 字符至今没有匹配上
              (princ c out)
-             (when from-buf                ; 如果是从buf中获取的字符，需要pop出并重置
+             (when from-buf                
                (buf-pop buf)))
             (t                             ; 4 之前有相等的，但是现在不相等了
-             (unless from-buf              ; 如果不是从buf中拿来的字符 需要加入到buf中，修改end
-               (buf-insert c buf))         ; 这里就是为了保留火种！很巧妙，现在暂时不相等以后未必不相等，这个字符说不定和old的第一个字符相等
-             (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个取出来 这个时候buf中一定是有数据的！并且避免了死循环！
+             (unless from-buf              
+               (buf-insert c buf))         
+             (princ (buf-pop buf) out)     
              (setf pos 0))))
     (buf-flush buf out)))
-;; CL-USER> (file-subst "baro" "baric" "a.txt" "b.txt")
 
-
-;; Exercises
-;; ex1
-(defun file-to-lststr(file)
-  (let ((acc nil))
-	(with-open-file (str file :direction :input)
-	  (do ((line (read-line str nil 'eof)
-				 (read-line str nil 'eof)))
-		  ((eql line 'eof))
-		(push line acc)))
-	(reverse acc)))
-;; ex2
-(defun file-to-lstexp(file)
-  (let ((acc nil))
-	(with-open-file (str file :direction :input)
-	  (do ((exp (read str nil 'eof)
-				(read str nil 'eof)))
-		  ((eql exp 'eof))
-		(push exp acc)))
-	(reverse acc)))
-;; ex3
-(defun appendwithoutnotation(file1 file2)
-  (with-open-file (in file2 :direction :input)
-	(with-open-file (out file1 :direction :output
-						 :if-exists :append)
-	  (do ((line (read-line in nil :eof)
-				 (read-line in nil :eof)))
-		  ((eql line :eof))
-		(terpri out)
-		(princ (subseq line 0 (position #\% line)) out)))))
-;; ex4
-(defun print-float-array (farr)
-  (let ((dimens (array-dimensions farr)))
-	(dotimes (i (first dimens))
-	  (dotimes (j (second dimens))
-		(format t "~10,2,0,,' F" (aref farr i j)))
-	  (terpri))))
-;; ex5 wildcards "+"   reference the source file input-and-ouput-ex5.lisp
-;; ex6 reference the source file input-and-output-ex6.lisp
-
+(file-subst "baro" "baric" "a.txt" "b.txt")

@@ -51,14 +51,14 @@
 ;;    %% -- #\%
 (defun parse-pattern (patt)
   (labels ((rec (i len ctrl acc)
-  (if (< i len)
-	  (let* ((c (char patt i))
-			 (ctrl-next (and (not ctrl) (char= c #\%))))
-		(rec (1+ i)
-			 len
-			 ctrl-next
-			 (if ctrl-next
-				 acc
+			 (if (< i len)
+				 (let* ((c (char patt i))
+						(ctrl-next (and (not ctrl) (char= c #\%))))
+				   (rec (1+ i)
+						len
+						ctrl-next
+						(if ctrl-next
+							acc
 				 (cons
 				  (if ctrl
 					  (case c
@@ -103,5 +103,5 @@
 				 (buf-insert c buf))        
 			   (princ (buf-pop buf) out)    
 			   (setf pos 0)))))
-	  (buf-flush buf out)))
+	(buf-flush buf out)))
 
