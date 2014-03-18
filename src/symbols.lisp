@@ -11,7 +11,6 @@
 	(:cat :meow)
 	(:pig :oink)))
 
-
 ;; Random Text
 (defparameter *words* (make-hash-table :size 10000))
 
@@ -40,7 +39,7 @@
   (case c
 	(#\. '|.|) (#\, '|,|) (#\; '|;|)
 	(#\! '|!|) (#\? '|?|) )) 
- 
+
 (let ((prev '|.|))
   (defun see (symb)
 	(let ((pair (assoc symb (gethash prev *words*))))
@@ -66,14 +65,14 @@
 		  (return (car pair))))))
 
 
-(read-text "./text/lost.txt")
+(read-text "./text/lost")
 (generate-text 15)
 
 ;; Exercises
 ;; ex1 Yes if they're in different packages
 ;; ex2 "FOO" 3 bytes 'FOO name package variable function attribute-list 20+ bytes
-;; ex3 a serious question TODO!
+;; ex3 a serious question, if defpackage with symbol, the symbol is interned in the package implicitly
 ;; ex4 reference to symbols-ex4.lisp
-;; ex5 
+;; ex5 read-text a Henley's poem to generate the *words*, then judge a string from the first words as prev found from *words* 
 
 
