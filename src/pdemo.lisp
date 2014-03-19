@@ -1,4 +1,4 @@
-(defpackage math
+(defpackage "MATH"
   (:use "COMMON-LISP")
   (:nicknames "m")
   (:export "FLOOR" "ADD" "SUBTRACT"))

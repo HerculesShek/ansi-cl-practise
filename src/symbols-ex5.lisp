@@ -1,4 +1,9 @@
 ;; in my opinion, this exercise inspect the single directed linked list
+;; to use this to verify whether or not a quote was produced by Henley
+;; We're supposed that the origin article is stored in a text "some.txt"
+;; first (read-txt "/path/to/some.txt")
+;; second (henleyp-sentence "Wast present, and with mighty wings outspread" #'my-char)
+;; of course, you can replace string stream with file stream
 (defparameter *words* (make-hash-table :size 10000))
 
 (defconstant maxword 100)
@@ -34,6 +39,51 @@
 		  (push (cons symb 1) (gethash prev *words*))
 		  (incf (cdr pair))))
 	(setf prev symb)))
+
+;; simple direction linked list 
+(defun henleyp-sentence (sen &optional (test #'my-char))
+  (multiple-value-bind (first index) (next-w sen test 0)
+	(if first
+		(let ((first-sym (intern (string-downcase first))))   ;; string-downcase can turn a char into a string  #\A => "a"
+		  (if (gethash first-sym *words*)
+			  (henleyp-process sen first-sym test index)
+			  nil)))))
+				
+(defun tokens (sen test &optional (start 0)) ;; test next-w
+  (multiple-value-bind (word index) (next-w sen test start)
+	(when word
+	  (format t "~A index is ~A   " word index)
+	  (format t "length is ~A ~%" (if (characterp  word) 1 (length word)))
+	  (if index
+		  (tokens sen test index)))))
+
+(defun henleyp-process (sen pre-sym test start)
+  (let ((choices (gethash pre-sym *words*)))
+	(multiple-value-bind (next index) (next-w sen test start)
+	  (let ((next-sym (intern (string-downcase next))))    ;; string-downcase can turn a char into a string  #\A => "a"
+		(if (and next (member next-sym choices :key #'car))
+			(if (null index)
+				t
+				(henleyp-process sen next-sym test index)))))))
+
+(defun next-w (sen test start)
+  (let ((p1 (position-if test sen :start start)))
+	(if p1
+		(let* ((p2 (position-if #'(lambda (x)
+									(not (funcall test x)))
+								sen :start p1))
+			   (prefix (position-if #'punc sen :start start :end p1)))
+		  (if prefix
+			  (values (char sen prefix) (1+ prefix))
+			  (values (subseq sen p1 p2) p2)))
+		(values nil nil))))
+
+(defun my-char (c)
+  (or (alpha-char-p c)
+	  (char= c #\')
+	  (char= c #\-)))
+
+
 
 
 

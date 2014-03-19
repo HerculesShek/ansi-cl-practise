@@ -36,4 +36,12 @@
 	  (+ x y))))
 (defun let*t2()
   ((lambda (x) ((lambda (y) (+ x y)) (+ x 1))) 1))
-  
+
+;; symbol-plist demo
+(defun foo (a)
+  (1+ a))
+
+(defun symbol-p-demo (fn)
+  (symbol-plist fn))
+ 
+(symbol-p-demo 'foo)
