@@ -65,7 +65,7 @@
 		  (return (car pair))))))
 
 
-(read-text "./text/lost")
+(read-text "./text/lost.txt")
 (generate-text 15)
 
 ;; Exercises
