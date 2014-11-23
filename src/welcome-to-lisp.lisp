@@ -1,3 +1,5 @@
+;;; 第二章的例子和本节的练习
+
 ;; 判断列表x中是否有nil
 (defun enigma (x)
   (and (not (null x)) ;;
