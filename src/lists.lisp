@@ -267,6 +267,8 @@
 	      (bfs end (append (cdr queue) (new-paths path node net)) res net))))
       (if res
 	  (car (sort res #'> :key #'length)))))
+;; 实际上这里的res的使用有些冗余了，其实使用res保存1条路径就可以
+;; 因为是广度优先搜索，queue后面的长度一定是最长的，新方案看下面
 
 (defun new-paths (path node net)
   (remove nil (mapcar #'(lambda (x) (if (member x path)
@@ -275,4 +277,27 @@
 		      (cdr (assoc node net)))))
 
 (longest-path 'a 'd *net*) ;; (A B C D)
+
+
+;; 新方案
+;; 这个版本的 new-paths 比上个版本要简洁一些！
+(defun new-paths (path node net)
+  (let (acc)
+    (dolist (x (cdr (assoc node net)))
+      (or (member x path)
+          (push (cons x path) acc)))
+    acc))
+
+(defun bfs-l (end queue net sol)
+  (if queue
+      (let ((path (car queue)))
+	(let ((node (car path)))
+	  (bfs-l end
+		 (append (cdr queue) (new-paths path node net))
+		 net
+		 (if (eql node end) path sol))))
+      (reverse sol)))
+
+(defun longest-path (start end net)
+  (bfs-l end (list (list start)) net nil))
 
