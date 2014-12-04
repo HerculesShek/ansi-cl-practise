@@ -196,11 +196,24 @@
       (format t "bst-traverse:~%~T")
       (bst-traverse #'princ nums))))
 
+;; labels
+(defun recursive-times (k n)
+  (labels ((temp (n) 
+             (if (zerop n) 0 (+ k (temp (1- n))))))
+    (temp n)))
+;; labels中函数定义不分先后 可以相互使用，但是不要死锁！ 
+(defun labels-test ()
+  (labels ((f2 (c d) (+ (f1 100 c) d))
+           (f1 (a b) (+ a b)))
+    (+ (f1 2 3) (f2 3 4))))
+
+
 ;; Exercises
 ;; ex1
 ;; 这里主要是找到一个规律
 ;; 思路是在旋转的时候把原来的一个整行当作一个整体考虑
-;; 坐标的值：顺时针旋转一个正方的二维数组的话，原来的列坐标变为现在的行坐标
+;; 坐标的值：
+;;   顺时针旋转一个正方的二维数组的话，原来的列坐标变为现在的行坐标
 ;; 正方形的行数-1-原来的列坐标变为现在的行坐标 即可 
 ;; 逆时针则调换上面两条原则即可
 (defun quarter-turn (arr)
@@ -213,13 +226,13 @@
            new-arr))))
 
 ;; ex2 
-;; a
-(defun my-copy-list (lst)
+;; a 
+(defun my-copy-list-append (lst)
   (reduce #'(lambda (lst obj) (append lst (list obj))) lst :initial-value nil))
-(defun my-copy-list-c (lst)
+(defun my-copy-list-cons (lst)
   (reduce #'cons lst :from-end t :initial-value nil)) 
 ;; (reduce #'(lambda (a lst) (cons a lst)) '(a b c) :from-end t :initial-value nil)
-;; 从此处看出，默认是左结合，加入 :from-end t 之后，变为了右结合，这时候要注意上面lambda中的参数的顺序
+;; 从此处看出，默认是左结合，加入 :from-end t 之后，变为了右结合，这时候要一定注意上面lambda中的参数的顺序，左结合的时候上次的结果作为第一个参数，右结合的时候作为第二个参数！
 
 ;; b
 (defun my-reverse (lst)
@@ -232,12 +245,12 @@
   middle
   right)
 
-(defun copy-tree-ex3 (tree)
+(defun copy-t (tree)
   (and tree
        (make-my-node :elt (my-node-elt tree)
-                     :left (my-node-left tree)
-                     :middle (my-node-middle tree)
-                     :right (my-node-right tree))))
+                     :left (copy-t (my-node-left tree))
+                     :middle (copy-t (my-node-middle tree))
+                     :right (copy-t (my-node-right tree)))))
 (defun value-test (obj tree)
   (if tree
       (or
@@ -252,27 +265,24 @@
       (append (bst-ordered-list (node-r bst))
               (list (node-elt bst))
               (bst-ordered-list (node-l bst)))))
-;; labels and ex4-v2 ex4-v3
-;; labels
-(defun recursive-times (k n)
-  (labels ((temp (n) 
-             (if (zerop n) 0 (+ k (temp (1- n))))))
-    (temp n)))
 ;; ex4-v2
 (defun bst->list (bst0)
   (labels ((rec (bst1 acc)
              (if bst1
-                 (rec (node-r bst1) (cons (node-elt bst1) (rec (node-l bst1) acc)))
+                 (rec (node-r bst1) 
+                      (cons (node-elt bst1) 
+                            (rec (node-l bst1) acc)))
                  acc)))
     (rec bst0 nil)))
 ;; ex4-v3
 (defun bst->lst (bst0)
   (labels ((rec (bst1 acc)
              (if bst1
-                 (rec (node-l bst1) (append (rec (node-r bst1) acc) (list (node-elt bst1))))
+                 (rec (node-l bst1) 
+                      (append (rec (node-r bst1) acc) 
+                              (list (node-elt bst1))))
                  acc)))
     (rec bst0 nil)))
-
 
 ;; ex5 上面的 bst-insert 与 bst-adjoin 功能一样
 ;; ex6
@@ -286,7 +296,7 @@
 ;; b-v1
 (defun hash->assoc (h)
   (if h
-      (let ((lst nil))
+      (let ((lst nil)) ; (let ((lst))
         (maphash #'(lambda (k v)
                      (setf lst (cons (cons k v) lst)))
                  h)
@@ -297,3 +307,5 @@
     (maphash #'(lambda (k v) (push (cons k v) acc)) ht)
     acc))
 ;; push is more effective than cons a obj to a list
+
+

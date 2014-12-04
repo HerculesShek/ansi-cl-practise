@@ -11,7 +11,7 @@
 ;;; 测试 labels 函数 
 (defun labels-test ()
   (labels ((f2 (c d) (+ (f1 100 c) d))
-	   (f1 (a b) (+ a b)))
+           (f1 (a b) (+ a b)))
     (+ (f1 2 3) (f2 3 4))))
 
 ;;; the main method  
@@ -24,7 +24,7 @@
 (defun let-test()
   (let ((x 'a))
     (if (member x l)
-	x)))
+        x)))
 
 (defun a()
   (setf l '(a b c))
@@ -35,7 +35,7 @@
   (dolist (e '(a b c) )
     (format t "~A" e)
     (if (eql e 'bb)
-	(return 'aa))))
+        (return 'aa))))
 
 (defun let*t()
   (let ((x 1))
