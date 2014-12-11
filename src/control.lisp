@@ -6,6 +6,15 @@
   (if (eql x 'c)
       (return 42))) ; (return-from nil 42)))
 
+;; 测试默认的return在嵌套的隐式的nil block中的行为
+;; 是只返回给最近的那个nil block
+(defun nest-dolist-test ()
+  (dolist (x '((1 2 3) (4 5 6) (7 8 9)) nil)
+    (dolist (y x)
+      (format t "~A~T" y)
+      (if (eql y 5)
+          (return 42)))))
+
 ;; str->integer :return-from
 (defun read-integer (str)
   (let ((accum 0))

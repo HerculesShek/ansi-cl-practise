@@ -8,11 +8,7 @@
       1
       (+ (fabo (- n 1)) (fabo (- n 2))))) 
 
-;;; 测试 labels 函数 
-(defun labels-test ()
-  (labels ((f2 (c d) (+ (f1 100 c) d))
-           (f1 (a b) (+ a b)))
-    (+ (f1 2 3) (f2 3 4))))
+
 
 ;;; the main method  
 (defun main()
