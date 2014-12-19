@@ -8,7 +8,9 @@
       1
       (+ (fabo (- n 1)) (fabo (- n 2))))) 
 
-
+;; 使用斐波纳契打印自然底数e
+(defun print-e (n ht)
+  
 
 ;;; the main method  
 (defun main()
