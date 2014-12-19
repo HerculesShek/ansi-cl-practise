@@ -5,7 +5,7 @@
 (defun enigma (x)
   (and (not (null x))
        (or (null (car x))
-	   (enigma (cdr x)))))
+           (enigma (cdr x)))))
 ;; 可以把and当作条件传递，碰到第一个nil则终止，否则就
 ;; 一直执行每个表达式并继续传递
 
@@ -16,9 +16,9 @@
   (if (null y)
       nil
       (if (eql (car y) x)
-	  0
-	  (let ((z (mystery x (cdr y))))
-	    (and z (+ z 1))))))
+          0
+          (let ((z (mystery x (cdr y))))
+            (and z (+ z 1))))))
 
 ;;; TODO 确认一下上面哪种递归是尾递归
 
@@ -27,7 +27,7 @@
 (defun has-list (lst)
   (and lst
        (or (listp (car lst))
-	   (has-list (cdr lst)))))
+           (has-list (cdr lst)))))
 
 ;; ex-8 
 ;; 给出函数的迭代与递归版本：
@@ -40,8 +40,8 @@
 (defun print-dot-r (n)
   (if (plusp n)
       (progn
-	(format t "*")
-	(print-dot-r (- n 1)))
+        (format t "*")
+        (print-dot-r (- n 1)))
       "print done"))
 
 ;; ex-8 b 接受一个列表，并返回a在列表里所出现的次数
