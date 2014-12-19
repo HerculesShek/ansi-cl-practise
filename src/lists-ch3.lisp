@@ -10,10 +10,10 @@
   (if (null lst)
       (list (n-elts elt n))
       (let ((next (car lst)))
-	(if (equal elt next)
-	    (compr elt (+ n 1) (cdr lst))
-	    (cons (n-elts elt n) 
-		  (compr next 1 (cdr lst))))))) ;; 如果cons的第二个参数是list的话，就是把第一个参数添加到这个列表的开头
+        (if (equal elt next)
+            (compr elt (+ n 1) (cdr lst))
+            (cons (n-elts elt n) 
+                  (compr next 1 (cdr lst))))))) ; 如果cons的第二个参数是list的话，就是把第一个参数添加到这个列表的开头
 ;; TODO compr 是不是尾递归？
 (defun n-elts (elt n)
   (if (> n 1)
@@ -25,10 +25,10 @@
   (if (null lst)
       nil
       (let ((elt (car lst))
-	    (rest (uncompress (cdr lst)))) ;; 这里的这种递归方式是不是就是尾递归？
-	(if (consp elt)
-	    (append (apply #'list-of elt) rest) ;; 这里的apply的传参很灵活
-	    (cons elt rest)))))
+            (rest (uncompress (cdr lst)))) ; 这里的这种递归方式是不是就是尾递归？
+        (if (consp elt)
+            (append (apply #'list-of elt) rest) ; 这里的apply的传参很灵活
+            (cons elt rest)))))
 
 (defun list-of (n elt)
   (if (zerop n)
@@ -41,23 +41,23 @@
   (if (atom root)
       root
       (cons (my-copy-tree (car root))
-	    (my-copy-tree (cdr root)))))
+            (my-copy-tree (cdr root)))))
 
 ;; 自定义subst
 (defun my-subst (new old tree)
   (if (eql old tree)
       new
       (if (atom tree)
-	  tree
-	  (cons (my-subst new old (car tree))
-		(my-subst new old (cdr tree))))))
+          tree
+          (cons (my-subst new old (car tree))
+                (my-subst new old (cdr tree))))))
 
 ;; 自定义member-if
 (defun our-member-if (fn lst)
   (and (consp lst)
        (if (funcall fn (car lst))
-	   lst
-	   (our-member-if fn (cdr lst)))))
+           lst
+           (our-member-if fn (cdr lst)))))
 
 
 ;; 判断一个列表是不是回文的
@@ -65,13 +65,13 @@
 (defun mirror? (s)
   (let ((len (length s)))
     (if (evenp len)  ; 长度是偶数
-	(or (equal len 0)
-	    (let ((mid (/ len 2)))
-	      (equal (subseq s 0 mid)
-		     (reverse (subseq s mid)))))
-	(let ((mid (/ (- len 1) 2)))  ; 长度是奇数
-	  (equal (subseq s 0 mid)
-		 (reverse (subseq s (+ mid 1))))))))
+        (or (equal len 0)
+            (let ((mid (/ len 2)))
+              (equal (subseq s 0 mid)
+                     (reverse (subseq s mid)))))
+        (let ((mid (/ (- len 1) 2)))  ; 长度是奇数
+          (equal (subseq s 0 mid)
+                 (reverse (subseq s (+ mid 1))))))))
 
 ;; 获取列表中第n个最大的值
 (defun nthmost (n lst)
@@ -89,9 +89,9 @@
 (defun our-assoc (key lst)
   (and (consp lst)
        (let ((pair (car lst)))
-	 (if (eql key (car pair))
-	     pair
-	     (our-assoc key (cdr lst))))))
+         (if (eql key (car pair))
+             pair
+             (our-assoc key (cdr lst))))))
 
 ;;; breadth-first search
 ;;; 网络可以这么表示: '((a b c) (b c) (c d))
@@ -106,18 +106,18 @@
   (if (null queue)
       nil  ; 此处 (null queue) nil 可以去掉 用queue来代替即可
       (let ((path (car queue)))
-	(let ((node (car path)))
-	  (if (equal end node)
-	      (reverse path)
-	      (bfs end
-		   (append (cdr queue)
-			   (new-paths path node net))
-		   net))))))
+        (let ((node (car path)))
+          (if (equal end node)
+              (reverse path)
+              (bfs end
+                   (append (cdr queue)
+                           (new-paths path node net))
+                   net))))))
 
 ;; 功能函数
 (defun new-paths (path node net)
   (mapcar #'(lambda (x) (cons x path))
-	  (cdr (assoc node net))))
+          (cdr (assoc node net))))
 
 
 
@@ -136,12 +136,12 @@
 (defun occurrences (lst)
   (if (consp lst)
       (let ((occ))
-	(dolist (elt lst)
-	  (let ((ac (assoc elt occ)))
-	    (if (null ac) ;可简写为(if ac 下面两行调换位置
-		(push (cons elt 1) occ)
-		(setf (cdr ac) (+ 1 (cdr ac)))))) ;; 这里的赋值很重要，可以看出ac并不是一个副本！也就是说let操作不会返回副本，而是一个引用！
-	(sort occ #'> :key #'cdr))
+        (dolist (elt lst)
+          (let ((ac (assoc elt occ)))
+            (if (null ac) ; 可简写为(if ac 下面两行调换位置
+                (push (cons elt 1) occ)
+                (setf (cdr ac) (+ 1 (cdr ac)))))) ;; 这里的赋值很重要，可以看出ac并不是一个副本！也就是说let操作不会返回副本，而是一个引用！
+        (sort occ #'> :key #'cdr))
       lst))
 ;; 同时，assoc返回的也是个引用，而不是副本，方便修改
 ;; 上面的 (setf (cdr ac) (+ 1 (cdr ac))) 是可以写成 (incf (cdr ac)) incf 函数的作用就是让某个变量的值加1 而decf则是减1
@@ -158,7 +158,7 @@
   lst)
 (defun p (lst n)
   (when lst
-    (setf (car lst) (+ (car lst) n)) ;(incf (car lst) n)
+    (setf (car lst) (+ (car lst) n)) ; (incf (car lst) n)
     (p (cdr lst) (+ n 1))))
 
 ;; ex5-a-v2 不修改原来的列表，传入一个副本即可
@@ -166,8 +166,8 @@
   (and (consp lst)
        (every #'numberp lst)
        (let ((llst (copy-list lst)))
-	 (p llst 0)
-	 llst))))
+         (p llst 0)
+         llst))))
 
 ;; ex5-a-v3 函数p的另一版本，不修改lst的
 (defun pos+ (lst)
@@ -185,10 +185,10 @@
   (and (consp lst)
        (every #'numberp lst)
        (let ((index 0) (new-list nil)) 
-	 (dolist (e lst)
-	   (push (+ e index) new-list)
-	   (setf index (+ 1 index))) ;; (incf index)
-	 (reverse new-list))))
+         (dolist (e lst)
+           (push (+ e index) new-list)
+           (setf index (+ 1 index))) ; (incf index)
+         (reverse new-list))))
 ;; 第4行可简写为 (let ((index 0) (new-list))
 
 ;; ex5-b-v2
@@ -196,9 +196,9 @@
   (and (consp lst)
        (every #'numberp lst)
        (do ((llst lst (cdr llst))
-	    (index 0 (+ index 1))
-	    (acc nil (cons (+ index (car llst)) acc)))
-	   ((null llst) (reverse acc)))))
+            (index 0 (+ index 1))
+            (acc nil (cons (+ index (car llst)) acc)))
+           ((null llst) (reverse acc)))))
 
 ;; (c) pos+mapcar
 ;; ex5-c-v1
@@ -206,10 +206,10 @@
   (and (consp lst)
        (every #'numberp lst)
        (let ((ind nil) (l (length lst)))
-	 (do ((i 0 (+ 1 i)))
-	     ((= i l))
-	   (push i ind)) ;; 一个比较笨的存放索引序列的方法
-	 (mapcar #'+ lst (reverse ind)))))
+         (do ((i 0 (+ 1 i)))
+             ((= i l))
+           (push i ind)) ; 一个比较笨的存放索引序列的方法
+         (mapcar #'+ lst (reverse ind)))))
 
 ;; ex5-c-v2 相比v1 此版本简洁高效
 (defun pos+mapcar (lst)
@@ -226,13 +226,13 @@
   (if (null lst)
       (list (dot-n-elts elt n))
       (let ((next (car lst)))
-	(if (eql next elt)
-	    (dot-compr elt (+ n 1) (cdr lst))
-	    (cons (dot-n-elts elt n) (dot-compr (car lst) 1 (cdr lst)))))))
+        (if (eql next elt)
+            (dot-compr elt (+ n 1) (cdr lst))
+            (cons (dot-n-elts elt n) (dot-compr (car lst) 1 (cdr lst)))))))
 (defun dot-n-elts (elt n)
   (if (= 1 n)
       elt
-      (cons n elt))) ;; just change this piece
+      (cons n elt))) ; just change this piece
 ;; 这里还得看一下 list 函数的原理！
 
 
@@ -241,11 +241,11 @@
   (if (atom lst)
       (format t "~a" lst)
       (progn
-	(format t "(")
-	(showdots (car lst))
-	(format t " . ")
-	(showdots (cdr lst))
-	(format t ")"))))
+        (format t "(")
+        (showdots (car lst))
+        (format t " . ")
+        (showdots (cdr lst))
+        (format t ")"))))
 
 ;; ex9
 ;; 写一个程序来找到 3.15 节里表示的网络中，最长有
@@ -259,24 +259,24 @@
 (defun bfs (end queue res net) 
   (if queue
       (let ((path (car queue)))
-	(let ((node (car path)))
-	  (if (eql node end)
-	      (progn
-		(push (reverse path) res)
-		(bfs end (cdr queue) res net))
-	      (bfs end (append (cdr queue) (new-paths path node net)) res net))))
+        (let ((node (car path)))
+          (if (eql node end)
+              (progn
+                (push (reverse path) res)
+                (bfs end (cdr queue) res net))
+              (bfs end (append (cdr queue) (new-paths path node net)) res net))))
       (if res
-	  (car (sort res #'> :key #'length)))))
+          (car (sort res #'> :key #'length)))))
 ;; 实际上这里的res的使用有些冗余了，其实使用res保存1条路径就可以
 ;; 因为是广度优先搜索，queue后面的长度一定是最长的，新方案看下面
 
 (defun new-paths (path node net)
   (remove nil (mapcar #'(lambda (x) (if (member x path)
-					nil
-					(cons x path)))
-		      (cdr (assoc node net)))))
+                                        nil
+                                        (cons x path)))
+                      (cdr (assoc node net)))))
 
-(longest-path 'a 'd *net*) ;; (A B C D)
+(longest-path 'a 'd *net*) ; (A B C D)
 
 
 ;; 新方案
@@ -291,11 +291,11 @@
 (defun bfs-l (end queue net sol)
   (if queue
       (let ((path (car queue)))
-	(let ((node (car path)))
-	  (bfs-l end
-		 (append (cdr queue) (new-paths path node net))
-		 net
-		 (if (eql node end) path sol))))
+        (let ((node (car path)))
+          (bfs-l end
+                 (append (cdr queue) (new-paths path node net))
+                 net
+                 (if (eql node end) path sol))))
       (reverse sol)))
 
 (defun longest-path (start end net)
