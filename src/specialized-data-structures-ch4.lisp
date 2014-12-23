@@ -68,6 +68,9 @@
     (if p
         (incf p)
         nil)))
+
+;; TODO 功能更加强大的整数转化 加入关键字参数，加入进制
+;; 加入科学计数表示法，加入+-号
 ;; 自定义 parse-integer  (my-parse-integer "123") => 123
 (defun my-parse-integer (str)
   (and (every #'digit-char-p str)
@@ -76,11 +79,9 @@
            (setf res (+ (* 10 res)
                         (digit-char-p (char str index))))))))
 
-;; TODO 功能更加强大的整数转化 加入关键字参数，加入进制
-;; 加入科学计数表示法，加入+-号
 
 
-;;; BST Binary Search Tree
+;;; BST -- Binary Search Tree
 ;; node 
 (defstruct (node (:print-function
                   (lambda (node s d) ; 打印函数必须接受三个参数
@@ -89,7 +90,7 @@
   (l nil)
   (r nil))
 ;; insert 非平衡的
-;; obj---要查入到树中的元素的值 
+;; obj---要查入到树中的元素的值
 ;; bst---二叉搜索树
 ;; <---表示的是比较函数 不是小于运算符
 (defun bst-insert (obj bst <)
@@ -160,7 +161,7 @@
                  (make-node :elt (node-elt (bst-max r))
                             :l l
                             :r (bst-remove-min r)))))))
-;; print 
+;; print 前序
 (defun print-bst (bst)
   (when bst
     (format t "~A <--~A--> ~A~%" (node-l bst) bst (node-r bst))
@@ -201,7 +202,7 @@
   (labels ((temp (n) 
              (if (zerop n) 0 (+ k (temp (1- n))))))
     (temp n)))
-;; labels中函数定义不分先后 可以相互使用，但是不要死锁！ 
+;; labels中函数定义不分先后 可相互使用，但是不要死锁！ 
 (defun labels-test ()
   (labels ((f2 (c d) (+ (f1 100 c) d))
            (f1 (a b) (+ a b)))
@@ -225,12 +226,12 @@
                (setf (aref new-arr j (- d 1 i)) (aref arr i j))))
            new-arr))))
 
-;; ex2 
-;; a 
+;; ex2
+;; a
 (defun my-copy-list-append (lst)
   (reduce #'(lambda (lst obj) (append lst (list obj))) lst :initial-value nil))
 (defun my-copy-list-cons (lst)
-  (reduce #'cons lst :from-end t :initial-value nil)) 
+  (reduce #'cons lst :from-end t :initial-value nil))
 ;; (reduce #'(lambda (a lst) (cons a lst)) '(a b c) :from-end t :initial-value nil)
 ;; 从此处看出，默认是左结合，加入 :from-end t 之后，变为了右结合，这时候要一定注意上面lambda中的参数的顺序，左结合的时候上次的结果作为第一个参数，右结合的时候作为第二个参数！
 
@@ -286,7 +287,7 @@
 
 ;; ex5 上面的 bst-insert 与 bst-adjoin 功能一样
 ;; ex6
-;; a
+;; a 
 (defun assoc->hash (a)
   (if a
       (let ((h (make-hash-table)))
@@ -307,5 +308,4 @@
     (maphash #'(lambda (k v) (push (cons k v) acc)) ht)
     acc))
 ;; push is more effective than cons a obj to a list
-
 

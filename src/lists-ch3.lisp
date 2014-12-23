@@ -43,7 +43,7 @@
       (cons (my-copy-tree (car root))
             (my-copy-tree (cdr root)))))
 
-;; 自定义subst
+;; 自定义subst 递归定义
 (defun my-subst (new old tree)
   (if (eql old tree)
       new
@@ -69,9 +69,10 @@
             (let ((mid (/ len 2)))
               (equal (subseq s 0 mid)
                      (reverse (subseq s mid)))))
-        (let ((mid (/ (- len 1) 2)))  ; 长度是奇数
-          (equal (subseq s 0 mid)
-                 (reverse (subseq s (+ mid 1))))))))
+        (or (equal len 1)
+            (let ((mid (/ (- len 1) 2)))  ; 长度是奇数
+              (equal (subseq s 0 mid)
+                     (reverse (subseq s (+ mid 1)))))))))
 
 ;; 获取列表中第n个最大的值
 (defun nthmost (n lst)
@@ -80,7 +81,7 @@
 
 ;; 反序输出一个列表
 (defun our-reverse (lst)
-  (let ((acc)) ; 这么写就是acc设为nil
+  (let ((acc)) ; acc为nil
     (dolist (elt lst)
       (push elt acc))
     acc))
@@ -94,14 +95,14 @@
              (our-assoc key (cdr lst))))))
 
 ;;; breadth-first search
-;;; 网络可以这么表示: '((a b c) (b c) (c d))
+;;; 网络可以这么表示: '((a b c) (b c) (c d)) --关联列表
 ;;; 就是a节点可直达b和c，b可以直达c，c可以直达d
 ;;; 调用的时候 (shortest-path 'a 'd net) => (a c d)
 ;; 最短路径算法的入口
 (defun shortest-path (start end net)
   (bfs end (list (list start)) net))
 
-;; 核心算法
+;; 核心算法 广度优先搜索
 (defun bfs (end queue net)
   (if (null queue)
       nil  ; 此处 (null queue) nil 可以去掉 用queue来代替即可
@@ -119,6 +120,9 @@
   (mapcar #'(lambda (x) (cons x path))
           (cdr (assoc node net))))
 
+(defun bfs-test ()
+  (let ((net '((a b c) (b c) (c d))))
+    (shortest-path 'a 'd net)))
 
 
 ;;; Exercises 
@@ -148,26 +152,31 @@
 
 ;; ex4 因为member默认使用的是eql比较规则 :test #'equal
 
-;; ex5
-;; (a) pos+recursive 练习5的递归版本，修改原来的列表，可以通过传入副本来实现不修改
-;; ex5-a-v1 修改原来的列表
-(defun pos+ (lst) 
+;;; ex5 假设函数 pos+ 接受一个列表并返回把每个元素加上
+;;; 自己的位置的列表：
+;;; > (pos+ '(7 5 1 4))
+;;; (7 6 3 7)
+;; (a) pos+recursive 练习5的递归版本，修改原来的列表，可
+;; 以通过传入副本来实现不修改
+;; ex5-a-v1 修改原来的列表 有副作用
+(defun pos+ (lst)
   (and (consp lst)
        (every #'numberp lst)
        (p lst 0))
   lst)
+;; 仅仅是处理lst而已，返回值为nil
 (defun p (lst n)
   (when lst
     (setf (car lst) (+ (car lst) n)) ; (incf (car lst) n)
     (p (cdr lst) (+ n 1))))
 
-;; ex5-a-v2 不修改原来的列表，传入一个副本即可
+;; ex5-a-v2 不修改原列表，传入一个副本即可，还是使用p函数
 (defun pos+ (lst)
   (and (consp lst)
        (every #'numberp lst)
        (let ((llst (copy-list lst)))
          (p llst 0)
-         llst))))
+         llst)))
 
 ;; ex5-a-v3 函数p的另一版本，不修改lst的
 (defun pos+ (lst)
@@ -178,9 +187,8 @@
   (when lst
     (cons (+ n (car lst)) (p-v2 (cdr lst) (incf n)))))
 
-
 ;; (b) pos+iteration 练习5的迭代版本，不修改原来的列表
-;; ex5-b-v1
+;; ex5-b-v1 dolist
 (defun pos+i (lst)
   (and (consp lst)
        (every #'numberp lst)
@@ -191,7 +199,7 @@
          (reverse new-list))))
 ;; 第4行可简写为 (let ((index 0) (new-list))
 
-;; ex5-b-v2
+;; ex5-b-v2 do
 (defun pos+i (lst)
   (and (consp lst)
        (every #'numberp lst)
@@ -217,7 +225,9 @@
     (mapcar #'(lambda (x) (+ x (incf i))) lst)))
 
 ;; ex6 ...
-;; ex7  > (dot-compress '(1 1 1 0 1 0 0)) => ((3 . 1) 0 1 (2 . 0))
+;; ex7  
+;; > (dot-compress '(1 1 1 0 1 0 0)) 
+;; => ((3 . 1) 0 1 (2 . 0))
 (defun dot-compress (lst)
   (if (consp lst)
       (dot-compr (car lst) 1 (cdr lst))
@@ -249,14 +259,14 @@
 
 ;; ex9
 ;; 写一个程序来找到 3.15 节里表示的网络中，最长有
-;; 限的路径 (不重复)。网络可能包含循环。
+;; 限的路径(不重复)。网络可能包含循环。
 (defparameter *net* '((a b c) (b a c) (c a b d) (d c)))
 
 (defun longest-path (start end net)
   (bfs end (list (list start)) nil net))
 
 ;; res stores all the path starting from 'start' and ending with 'end'
-(defun bfs (end queue res net) 
+(defun bfs (end queue res net)
   (if queue
       (let ((path (car queue)))
         (let ((node (car path)))
@@ -267,8 +277,9 @@
               (bfs end (append (cdr queue) (new-paths path node net)) res net))))
       (if res
           (car (sort res #'> :key #'length)))))
-;; 实际上这里的res的使用有些冗余了，其实使用res保存1条路径就可以
-;; 因为是广度优先搜索，queue后面的长度一定是最长的，新方案看下面
+;; 实际上上面的res的使用有些冗余了，其实使用res保存最
+;; 后的1条路径就可以, 因为是广度优先搜索，queue后面
+;; 的长度一定是最长的，新方案看下面
 
 (defun new-paths (path node net)
   (remove nil (mapcar #'(lambda (x) (if (member x path)
