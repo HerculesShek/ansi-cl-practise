@@ -431,6 +431,6 @@
   (setf (stu-name stu) "Will"))
 ;; > (test-2 )
 ;; <Will, 18, 0 d--0>
-;; 对于自定义的类的对象，函数传递的是引用！
+;; 测试2证明：对于自定义的类的对象，函数传递的是引用！
 (defun test-2 ()
   (let-student (make-student)))
