@@ -377,7 +377,7 @@
       (let ((curr (svref v i)))
         (extrame-exc (incf i) n v (if (< curr min) curr min) (if (> curr max) curr max)))))
 
-;; 9 version of catch and throw
+;; 9 a version of catch and throw
 (defun shortest-path (start end net)
   (and (consp net)
        (if (eql start end)
@@ -400,6 +400,8 @@
                     (throw 'found (reverse curr-path))  
                     curr-path)))
           (cdr (assoc node net))))
+
+;; 9 b TODO
 
 
 ;;; Other Demo fo Lisp research
