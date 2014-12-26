@@ -25,6 +25,16 @@
             (return-from read-integer nil))))
     accum))
 
+;; tagbody test 
+(defun tagbody-test ()
+  (tagbody
+     (setf x 0)
+   top
+     (incf x)
+     (format t "~A " x)
+     (if (< x 10) 
+         (go top))))
+
 ;; :cond and if
 (defun our-member (obj lst)
   (if (atom lst)
@@ -33,7 +43,7 @@
           lst
           (our-member obj (cdr lst)))))
 (defun our-member-cond (obj lst)
-  (cond ((atom lst) lst)
+  (cond ((atom lst) nil)
         ((eql obj (car lst)) lst)
         (t (our-member-cond obj (cdr lst)))))
 
@@ -59,9 +69,48 @@
               (list "a list")
               (t (format nil "a(n) ~(~A~)" (type-of x))))))
 
-;; :do test => (1 A) (2 1) (3 2) (4 3) (5 4) 
-;;			=>	A
-(defun do-test ()
+;;; do 测试return go return-from 
+;; CL-USER> (do-return-test )
+;; i is 1
+;; i is 2
+;; i is 3
+;; 99
+(defun do-return-test ()
+  (do ((i 1 (incf i)))
+      ((= i 10) 'done)
+    (format t "i is ~A~%" i)
+    (if (= i 3)
+        (return 99))))
+;; CL-USER> (do-return-from-test )
+;; i is 1
+;; i is 2
+;; i is 3
+;; 99
+(defun do-return-from-test ()
+  (do ((i 1 (incf i)))
+      ((= i 10) 'done)
+    (format t "i is ~A~%" i)
+    (if (= i 3)
+        (return-from nil 99))))
+;; 打印九九乘法表
+;; 这说明do的body部分是在一个tagbody中的 
+(defun do-go-test ()
+  (do ((i 1 (incf i)))
+      ((= i 10) 'done)
+    (setf j 0)
+   top
+    (incf j)
+    (format t "~A*~A=~A~2t" j i (* i j))
+    (when (< j i)
+      (go top))
+    (format t "~%")))
+
+;;; 下面的3个测试充分说明了do宏中局部变量的关系 
+;;; 以及局部变量和外部变量的关系
+;; > (do-var-test)
+;; (1 A) (2 1) (3 2) (4 3) (5 4) 
+;; A
+(defun do-var-test ()
   (let ((x 'a))
     (do ((x 1 (+ x 1))
          (y x x))
@@ -95,10 +144,16 @@
 
 ;; :mapc
 (defun mapc-test()
-  (mapc #'(lambda (x y)
-            (format t "~A ~A" x y))
+  (mapc #'(lambda (x y z)
+            (format t "~A ~A ~S, " x y z))
         '(hip flip slip)
-        '(hop flop slop)))
+        '(hop flop slop top)
+        '(1 2 3 4)))
+
+;; multiple-value-bind test 
+(defun multiple-value-bind-test ()
+  (multiple-value-bind (s m h) (get-decoded-time)
+    (format t "time is ~A:~A:~A" h m s)))
 
 ;; :catch :throw
 (defun super ()
@@ -115,7 +170,7 @@
         ((zerop x) 1)
         (t (* x (factorial (- x 1))))))
 
-;; :unwind-protect test
+;; :unwind-protect test #1
 (defun unwind-protect-test ()
   (let ((var 10))
     (setf var (catch 'cat
@@ -127,6 +182,7 @@
        (throw 'cat 13)
     (incf var)
     (format t "The value of var is ~A~%" var)))
+
 ;; unwind-protect test #2
 (defun up-test ()
   (let ((n 10))
@@ -141,17 +197,20 @@
     (format t "n is ~A" (incf n 3))))
 
 
-;; Date Arithmetic 
-(defconstant month #(0 31 59 90 120 151 181 212 243 273 304 334 365)) ;; 借助这个[start, end)
+;;; Date Arithmetic
+;; 借助这个向量 [start, end) 
+(defconstant month #(0 31 59 90 120 151 181 212 243 273 304 334 365)) 
+;; the year of 2000 is based 
 (defconstant yzero 2000)
+;; first part : transfer date to a number 
 ;; date -> num 
 (defun day->num (d m y)
   (+ (- d 1) (month-num m y) (year-num y)))
-;;
+;; how many days before the month of m in the year of y
 (defun month-num (m y)
   (+ (svref month (- m 1))
      (if (and (> m 2) (leap? y)) 1 0)))
-;;
+;; haw many days between the year of y and 2000
 (defun year-num (y)
   (let ((d 0))
     (if (>= y yzero)
@@ -159,15 +218,17 @@
           (incf d (year-days (+ yzero i))))
         (dotimes (i (- yzero y) (- d))
           (incf d (year-days (+ y i)))))))
-;;
+;; how many days in the year of y
 (defun year-days (y)
   (if (leap? y) 366 365))
+
+;; second part: transfer a number to a date
 ;; num -> date
 (defun num->date (n)
   (multiple-value-bind (y left) (num-year n)
     (multiple-value-bind (d m) (num-month left y)
       (values d m y))))
-;;
+;; use a number to calculate the year
 (defun num-year (n)
   (if (> n 0)
       (do* ((y yzero (+ y 1))
@@ -177,14 +238,14 @@
       (do* ((y (- yzero 1) (- y 1))
             (d (- (year-days y)) (- d (year-days y))))
            ((<= d n) (values y (- n d))))))
-;;
+;; use a number to calculate the month 
 (defun num-month (n y)
   (if (leap? y)
       (cond ((= n 59) (values 2 29))
             ((> n 59) (nmon (- n 1)))
             (t (nmon n)))
       (nmon n)))
-;;
+;; get the month and day
 (defun nmon (n)
   (let ((m (position n month :test #'<)))
     (values (+ 1 (- n (svref month (- m 1)))) m)))
@@ -193,27 +254,29 @@
   (num->date (+ n (day->num d m y))))
 
 
-;; Exercises
-;; 1 a
+;;; Exercises
+;; 1-a
 ((lambda (x) (cons x x)) (cdr y))
-;; 1 b
+;; 1-b
 ((lambda (w)
    (lambda (y)
      (cons w y))
    (+ w 2))
  (car x))
+
 ;; 2
 (defun mystery (x y)
-  (cond ((null y) nil)
-        ((eql (car y) x) 0)
-        (t (let ((z (mystery x (cdr y))))
-             (and z (+ z 1))))))
+  (cond 
+    ((null y) nil)
+    ((eql (car y) x) 0)
+    (t (let ((z (mystery x (cdr y))))
+         (and z (+ z 1))))))
 ;; 3
 (defun square (x)
   (if (and (< 0 x 6) (integerp x))
       x
       (* x x)))
-;; 4
+;; 4 Rewrite num-month to use case instead of svref.
 (defun month-num-case-svref(m y)
 	(+ (case m
        (1 0)
@@ -230,48 +293,57 @@
        (12 334)
        (13 365))
      (if (and (> m 2) (leap? y)) 1 0)))
-;; 5 iter
-(defun precedes (obj v)
-  (when (typep v 'sequence)
-    (let ((len (length v))
-          (pres nil))
-      (dotimes (i (- len 1) pres)
-        (if (eql (elt v (+ i 1)) obj)
-            (pushnew (elt v i) pres))))))
-;; 5 recur
-(defun precedes-r (obj v)
-  (when (typep v 'sequence)
-    (pre obj v 0 nil)))
-(defun pre (obj v n lst)
+
+;; 5 iteration
+;; process string sequece and vector 
+;; transfer string or sequence to vector because of svref 
+(defun precedes-iter (obj v)
+  (typecase v
+    (simple-base-string (precedes-iter obj (concatenate 'vector v)))
+    (vector
+     (let (pres
+           (len (length v)))
+       (dotimes (i (1- len) pres)
+         (if (eql (svref v (1+ i)) obj)
+             (pushnew (svref v i) pres)))))
+    (sequence (precedes-iter obj (concatenate 'vector v)))))
+;; 5 recursive
+(defun precedes-recur (obj v)
+  (typecase v
+    (simple-base-string (pre obj (concatenate 'vector v) 0 nil))
+    (vector (pre obj v 0 nil))
+    (sequence (pre obj (concatenate 'vector v) 0 nil))))
+(defun pre (obj v n pres)
   (if (= n (- (length v) 1))
-      lst
+      pres
       (progn 
-        (if (eql obj (elt v (+ 1 n)))
-            (pushnew (elt v n) lst))
-        (pre obj v (+ n 1) lst))))
+        (if (eql obj (svref v (+ 1 n)))
+            (pushnew (svref v n) pres))
+        (pre obj v (+ n 1) pres))))
+
 ;; 6 iteration
 (defun intersperse (obj lst)
-  (let ((ll nil))
+  (let (res)
     (dolist (e lst)
-      (push e ll)
-      (push obj ll))
-    (reverse (subseq ll 1))))
-;; 6 recur
+      (push e res)
+      (push obj res))
+    (reverse (subseq res 1))))
+;; 6 recursive
 (defun intersperse-r (obj lst)
-  (if (listp lst)
+  (if (consp lst)
       (cons (car lst) (inter obj (cdr lst)))))
 (defun inter (obj lst)
   (and lst
        (append (list obj (car lst)) (inter obj (cdr lst)))))
+
 ;; 7 (a)
 (defun compare-pair-recur (lst)
-  (and lst
+  (and (listp lst)
        (every #'numberp lst)
        (< 1 (length lst))
        (cpr-u lst)))
 (defun cpr-u(lst)
-  (if (null (cdr lst))
-      t
+  (or (null (cdr lst))
       (and (= 1 (abs (- (car lst) (cadr lst))))
            (cpr-u (cdr lst)))))
 ;; 7 (b)
@@ -279,15 +351,13 @@
   (and (listp lst)
        (every #'numberp lst)
        (< 1 (length lst))
-       (do ((ll (cdr lst) (cdr ll))
+       (do ((rest (cdr lst) (cdr rest))
             (flag (= 1 (abs (- (car lst) (cadr lst))))
-                  (= 1 (abs (- (car ll) (cadr ll))))))
-           ((or (not flag)
-                (null (cdr ll)))
-            flag))))
+                  (= 1 (abs (- (car rest) (cadr rest))))))
+           ((or (not flag) (null (cdr rest))) flag))))
 ;; 7 (c)
 (defun compare-pair-mapc (lst)
-  (and lst
+  (and (listp lst)
        (every #'numberp lst)
        (< 1 (length lst))
        (block nil
@@ -306,6 +376,7 @@
       (values min max)
       (let ((curr (svref v i)))
         (extrame-exc (incf i) n v (if (< curr min) curr min) (if (> curr max) curr max)))))
+
 ;; 9 version of catch and throw
 (defun shortest-path (start end net)
   (and (consp net)
@@ -315,8 +386,7 @@
              (bfs end (list (list start)) net)))))
 
 (defun bfs (end queue net)
-  (if (null queue)
-      nil
+  (if queue
       (let* ((path (car queue)) (node (car path)))
         (bfs end
              (append (cdr queue)
@@ -325,18 +395,42 @@
 
 (defun new-paths (path node net end) ;; throw when found
   (mapcar #'(lambda (n)
-              (let ((path1 (cons n path)))
+              (let ((curr-path (cons n path)))
                 (if (eql n end)
-                    (throw 'found (reverse path1))  
-                    path1)))
+                    (throw 'found (reverse curr-path))  
+                    curr-path)))
           (cdr (assoc node net))))
 
 
 ;;; Other Demo fo Lisp research
 ;; function variable context test
+;; test #1
 (defun let-name ()
   (let ((name "orig"))
     (change-name name)
     name))
 (defun change-name (name)
-  (setf name "change"))
+  (setf name "change")
+  (format t "the value of name is ~A" name))
+
+;; test #2
+(defstruct (student (:conc-name stu-)
+                    (:print-function print-stu))
+  (name "Jack" :type simple-base-string)
+  (age 18 :type integer)
+  (score 0 :type double))
+
+(defun print-stu (stu stream depth)
+  (format stream "<~A, ~A, ~A d--~A>" (stu-name stu) 
+          (stu-age stu) (stu-score stu) depth))
+
+(defun let-student (stu)
+  (change-stu-name stu)
+  stu)
+(defun change-stu-name (stu)
+  (setf (stu-name stu) "Will"))
+;; > (test-2 )
+;; <Will, 18, 0 d--0>
+;; 对于自定义的类的对象，函数传递的是引用！
+(defun test-2 ()
+  (let-student (make-student)))

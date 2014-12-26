@@ -287,7 +287,7 @@
 
 ;; ex5 上面的 bst-insert 与 bst-adjoin 功能一样
 ;; ex6
-;; a 
+;; a
 (defun assoc->hash (a)
   (if a
       (let ((h (make-hash-table)))
