@@ -172,10 +172,6 @@
 ;; #1 compose functions to one function
 ;; (compose #'a #'b #'c) 
 ;; == #'(lambda (&rest args) (a (b (apply #'c args))))
-;; > (funcall (compose #'(lambda (x) (* x x))
-;;                     #'(lambda (x) (- x 42))
-;;                     #'+) 21 2 21)
-;; 4
 (defun compose (&rest fns)
   (destructuring-bind (fn1 . rest) (reverse fns) ;; from end
     #'(lambda (&rest args)
@@ -183,14 +179,21 @@
                     (funcall f res)) ;; here is funcall, the precedes functions only take 1 argument
                 rest
                 :initial-value (apply fn1 args))))) ;; here is apply, so the last function to compose can take any number of arguments
+;; compose test 
+(defun compose-test () ; => 4
+  (funcall (compose #'(lambda (x) (* x x))
+                    #'(lambda (x) (- x 42))
+                    #'+) 21 2 21))
 
+;; take some predicate functions and args should satisfy one of them
 (defun disjoin (fn &rest fns)
   (if (null fns)
       fn
       (let ((disj (apply #'disjoin fns)))
         #'(lambda (&rest args)
-            (or (apply fn args) (apply disj args)))))) ;; it's not effective 
+            (or (apply fn args) (apply disj args)))))) ;; it's not effective
 
+;; take some predicates functions and args should satisfy all of them
 (defun conjoin (fn &rest fns)
   (if (null fns)
       fn
@@ -198,10 +201,12 @@
         #'(lambda (&rest args)
             (and (apply fn args) (apply conj args))))))
 
+;; 
 (defun curry (fn &rest args)
   #'(lambda (&rest args2)
       (apply fn (append args args2))))
 
+;; 
 (defun rcurry (fn &rest args)
   #'(lambda (&rest args2)
       (apply fn (append args2 args))))

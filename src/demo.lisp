@@ -1,4 +1,4 @@
-;;; 此文档是手记，想到的测试的东西都放在这个文件中
+;;;; 此文档是手记，想到的测试的东西都放在这个文件中
 
 ;;; 返回斐波纳契数列的第n个数字 
 ;;;  1 2 3 4 5 ...
@@ -50,3 +50,16 @@
   (symbol-plist fn))
 
 (symbol-p-demo 'foo)
+
+
+;; calcute the sum of a word 
+;; (sum-of-word "attitude")  =>  100
+(defun sum-of-word (w &optional (index 0))
+  (typecase w
+    (simple-base-string
+     (if (= index (length w))
+         0
+         (+ (- (char-code (char w index)) 96) 
+            (sum-of-word w (1+ index)))))
+    (t
+     0)))
