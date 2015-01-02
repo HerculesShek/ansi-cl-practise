@@ -179,6 +179,7 @@
                     (funcall f res)) ;; here is funcall, the precedes functions only take 1 argument
                 rest
                 :initial-value (apply fn1 args))))) ;; here is apply, so the last function to compose can take any number of arguments
+
 ;; compose test 
 (defun compose-test () ; => 4
   (funcall (compose #'(lambda (x) (* x x))
@@ -201,41 +202,54 @@
         #'(lambda (&rest args)
             (and (apply fn args) (apply conj args))))))
 
-;; 
+;; take a function and some arguments to it and expect the rest args
 (defun curry (fn &rest args)
   #'(lambda (&rest args2)
       (apply fn (append args args2))))
 
-;; 
+;; similar to curry 
 (defun rcurry (fn &rest args)
   #'(lambda (&rest args2)
       (apply fn (append args2 args))))
 
+;; like the function of constantly in Common Lisp
+;; take a value and returns a function that just return the value 
 (defun always (x)
   #'(lambda (&rest args) ;; warnings for unused lexical variable args
       x))
 
-;; dynamic scope
-(defun ds-1()
-  (let ((x 10))
-    (defun foo()
-      x))
-  
-  (let ((x 20))
-    (foo)))
 
+;;; dynamic scope
+;; closure is bound to a lexical variable
+(defun ds-1() ; => 10
+  (let ((x 10))
+    (defun foo-clo()
+      x))
+  (let ((x 20))
+    (foo-clo)))
+
+;; here x has a dynamic scope
 (defun ds-2()
   (let ((x 10))
-    (defun foo()
+    (defun foo-dec()
       (declare (special x))
       x))
   
   (let ((x 20))
     (declare (special x))
-    (foo)))
+    (foo-dec)))
 
-(let ((*print-base* 16))
-  (princ 32))
+;; dynamic scope is usually used to give some global varialbe a new value temporarily
+(defun print-base-test ()
+  (let ((*print-base* 16))
+    (princ 32)))
+
+;; dynamic scope test--chanage the global variable's value temporarily
+(defun dy-test-const ()
+  (defparameter name "xingzhe")
+  (let ((name "Will"))
+    (format t "name is ~A~%" name))
+  (format t "now name is ~A" name))
 
 ;; using recursion
 (defun fib (n)
@@ -244,6 +258,7 @@
       (+ (fib (- n 1))
          (fib (- n 2)))))
 
+;; fib iteration
 (defun fib-do (n)
   (do ((i n (- i 1))
        (f1 1 (+ f1 f2))
@@ -251,7 +266,7 @@
       ((<= i 1) f1)))
 
 ;; exercises
-;; ex1
+;; ex1 add :key and :start keywords parameter
 (defun tokens (str &key (test #'constituent) (start 0)) ;; 
   (let ((p1 (position-if test str :start start)))
     (if p1
@@ -259,12 +274,12 @@
                                    (not (funcall test c)))
                                str :start p1)))
           (cons (subseq str p1 p2)
-                (if p2
-                    (tokens str :test test :start p2))))))) ;; 
+                (if p2 (tokens str :test test :start p2)))))))
 (defun constituent (c)
   (and (graphic-char-p c)
        (not (char= c #\Space))))
-;; ex2
+
+;; ex2 add :key :test :start :end keyword parameters 
 (defun bin-search (obj vec &key (key #'identity) (test #'equal) (start 0) end) ;; [start end]
   (let* ((len (length vec))
          (e (if (and end (integerp end)) end (- len 1)))) 
@@ -278,22 +293,25 @@
         (if (funcall test obj (funcall key (svref vec start)))
             (svref vec start)
             nil)
-        (let ((mid (+ start (round (/ range 2)))))
-          (let ((obj2 (funcall key (svref vec mid))))
-            (if (> obj obj2)
-                (finder obj vec (+ mid 1) end key test)
-                (if (< obj obj2)
-                    (finder obj vec start (- mid 1) key test)
-                    (svref vec mid))))))))
-;; ex3
+        (let* ((mid (+ start (round (/ range 2))))
+               (obj2 (funcall key (svref vec mid))))
+          (if (> obj obj2)
+              (finder obj vec (+ mid 1) end key test)
+              (if (< obj obj2)
+                  (finder obj vec start (- mid 1) key test)
+                  (svref vec mid)))))))
+
+;; ex3 return the length of the parameters 
 (defun n-params (&rest args)
   (length args))
-;; ex4
-(defun most-2 (fn lst)
-  (cond 
+
+;; ex4 take a storing function and a list, return the 2 highest scoring elements of the list 
+(defun most-2 (&optional (fn #'identity) lst)
+  (cond
+    ((atom lst) (values nil nil))
     ((null lst) (values nil nil))
     ((null (cdr lst)) (values (car lst) nil))
-    (t 
+    (t
      (let* ((e1 (car lst))
             (e2 (cadr lst))
             (v1 (funcall fn e1))
@@ -308,31 +326,29 @@
              ((< v2 v) (setf e2 elt v2 v))
              (t nil))))
        (values e1 e2)))))
+
 ;; ex5
 (defun remove-if-1 (fn lst)
   (filter-5 #'(lambda (x) (not (funcall fn x))) lst))
+;; return the elements of lst that satisfy fn
 (defun filter-5 (fn lst)
   (let ((acc nil))
     (dolist (x lst)
       (let ((var (funcall fn x)))
         (if var (push x acc)))) ;; modified
     (nreverse acc)))
-(defun remove-if-2 (fn lst)
-  (let ((acc nil))
-    (dolist (obj lst)
-      (if (not (funcall fn obj))
-          (push obj acc)))
-    (nreverse acc)))
-;; ex6
+
+;; ex6 return the greatest argument passed so far
 (let ((max 0))
-  (defun max-fo-far (n)
+  (defun max-so-far (n)
     (and (numberp n)
          (progn 
            (setf max (if (< max n) n max))
            max))))
+
 ;; ex7
 (let ((pre))
-  (defun pre (n)
+  (defun greater-pre (n)
     (if (not (numberp n))
         (error "You should pass a number!")
         (if pre
@@ -351,14 +367,16 @@
         (prog1
             (and pre (< pre n))
           (setf pre n)))))
-;; ex8
+
+;; ex8 [0, 100]
 (defun expensive (n)
   (multiple-value-bind (res) (round (/ (* n (random 100)) 100))
     res))
 (let ((respo (make-array 101 :initial-element nil)))
-  (defun frugal (n)
+  (defun frugal (n) ; [0, 100]
     (or (svref respo n)
-        (setf (svref respo n) (expensive n))))))
+        (setf (svref respo n) (expensive n)))))
+
 ;; ex9 
 (defun apply-octal (&rest args)
   (let ((*print-base* 8))
