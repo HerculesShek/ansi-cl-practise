@@ -1,9 +1,11 @@
+;;;; source file for chapter 7 of ANSI Common Lisp
+
 (defun pseudo-cat (file)
   (with-open-file (str file :direction :input)
-	(do ((line (read-line str nil 'eof)
-			   (read-line str nil 'eof)))
-		((eql line 'eof))
-	  (format t "~A~%" line))))
+    (do ((line (read-line str nil 'eof)
+               (read-line str nil 'eof)))
+        ((eql line 'eof))
+      (format t "~A~%" line))))
 
 (defun read-1()
   (type-of (read)))
@@ -14,12 +16,12 @@
 
 (defun bref (buf n)
   (svref (buf-vec buf)
-		 (mod n (length (buf-vec buf)))))
+         (mod n (length (buf-vec buf)))))
 
 (defun (setf bref) (val buf n)
   (setf (svref (buf-vec buf)
-			   (mod n (length (buf-vec buf))))
-		val))
+               (mod n (length (buf-vec buf))))
+        val))
 
 (defun new-buf (len)
   (make-buf :vec (make-array len :initial-element nil)))
@@ -29,31 +31,31 @@
 
 (defun buf-pop (b)
   (prog1 
-	  (bref b (incf (buf-start b)))
-	(buf-reset b)))
+      (bref b (incf (buf-start b)))
+    (buf-reset b)))
 
 (defun buf-next (b)
   (when (< (buf-used b) (buf-new b))
-	(bref b (incf (buf-used b)))))
+    (bref b (incf (buf-used b)))))
 
 (defun buf-reset (b)
   (setf (buf-used b) (buf-start b)
-		(buf-new b) (buf-end b)))
+        (buf-new b) (buf-end b)))
 
 (defun buf-clear (b)
   (setf (buf-start b) -1 (buf-used b) -1
-		(buf-new b) -1 (buf-end b) -1))
+        (buf-new b) -1 (buf-end b) -1))
 
 (defun buf-flush (b str)
   (do ((i (1+ (buf-used b)) (1+ i)))
-	  ((> i (buf-end b)))
-	(princ (bref b i) str)))
+      ((> i (buf-end b)))
+    (princ (bref b i) str)))
 
 (defun file-subst (old new file1 file2)
   (with-open-file (in file1 :direction :input)
-	(with-open-file (out file2 :direction :output
-						 :if-exists :supersede)
-	  (stream-subst old new in out))))
+    (with-open-file (out file2 :direction :output
+                         :if-exists :supersede)
+      (stream-subst old new in out))))
 
 (defun stream-subst (old new in out)
   (let* ((pos 0)
@@ -89,38 +91,38 @@
 ;; ex1
 (defun file-to-lststr(file)
   (let ((acc nil))
-	(with-open-file (str file :direction :input)
-	  (do ((line (read-line str nil 'eof)
-				 (read-line str nil 'eof)))
-		  ((eql line 'eof))
-		(push line acc)))
-	(reverse acc)))
+    (with-open-file (str file :direction :input)
+      (do ((line (read-line str nil 'eof)
+                 (read-line str nil 'eof)))
+          ((eql line 'eof))
+        (push line acc)))
+    (reverse acc)))
 ;; ex2
 (defun file-to-lstexp(file)
   (let ((acc nil))
-	(with-open-file (str file :direction :input)
-	  (do ((exp (read str nil 'eof)
-				(read str nil 'eof)))
-		  ((eql exp 'eof))
-		(push exp acc)))
-	(reverse acc)))
+    (with-open-file (str file :direction :input)
+      (do ((exp (read str nil 'eof)
+                (read str nil 'eof)))
+          ((eql exp 'eof))
+        (push exp acc)))
+    (reverse acc)))
 ;; ex3
 (defun appendwithoutnotation(file1 file2)
   (with-open-file (in file2 :direction :input)
-	(with-open-file (out file1 :direction :output
-						 :if-exists :append)
-	  (do ((line (read-line in nil :eof)
-				 (read-line in nil :eof)))
-		  ((eql line :eof))
-		(terpri out)
-		(princ (subseq line 0 (position #\% line)) out)))))
+    (with-open-file (out file1 :direction :output
+                         :if-exists :append)
+      (do ((line (read-line in nil :eof)
+                 (read-line in nil :eof)))
+          ((eql line :eof))
+        (terpri out)
+        (princ (subseq line 0 (position #\% line)) out)))))
 ;; ex4
 (defun print-float-array (farr)
   (let ((dimens (array-dimensions farr)))
-	(dotimes (i (first dimens))
-	  (dotimes (j (second dimens))
-		(format t "~10,2,0,,' F" (aref farr i j)))
-	  (terpri))))
+    (dotimes (i (first dimens))
+      (dotimes (j (second dimens))
+        (format t "~10,2,0,,' F" (aref farr i j)))
+      (terpri))))
 ;; ex5 wildcards "+"   reference the source file input-and-ouput-ex5.lisp
 ;; ex6 reference the source file input-and-output-ex6.lisp
 
