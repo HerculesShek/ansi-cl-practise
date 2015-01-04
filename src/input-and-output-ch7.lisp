@@ -1,5 +1,6 @@
 ;;;; source file for chapter 7 of ANSI Common Lisp
 
+;; print the contents of the file to toplevel
 (defun pseudo-cat (file)
   (with-open-file (str file :direction :input)
     (do ((line (read-line str nil 'eof)
@@ -7,56 +8,78 @@
         ((eql line 'eof))
       (format t "~A~%" line))))
 
+;; get the type of the express parsed by read function
 (defun read-1()
   (type-of (read)))
 
-;; String Substitution -- an execllent example!
+
+;;; ---------------------------------------------------
+;;; String Substitution -- an execllent example!
+;;; We should understand the conception of ring buffer 
+;;; ---------------------------------------------------
+;; structure buf 
+;; It has 5 fields 
+;; vec -- a vector contaions the objects stored in the buffer 
+;; start -- pointing the first value in the buffer, will be incremented when pop a value 
+;; end -- pointing the last value in the buffer, will be incremented when insert a value
+;; used and new are some information for the buffer 
+;; start <= used <= new <= end 
 (defstruct buf
   vec (start -1) (used -1) (new -1) (end -1))
 
+;; take a buf and a index, return the element stored at that index
 (defun bref (buf n)
   (svref (buf-vec buf)
          (mod n (length (buf-vec buf)))))
-
+;; setf of bref 
 (defun (setf bref) (val buf n)
   (setf (svref (buf-vec buf)
                (mod n (length (buf-vec buf))))
         val))
 
+;; get a new buffer able to hold up to len elements 
 (defun new-buf (len)
   (make-buf :vec (make-array len :initial-element nil)))
 
+;; insert a new value x into buffer b, increments the end and put the value at that location
 (defun buf-insert (x b)
   (setf (bref b (incf (buf-end b))) x))
 
+;; return the first value in the buffer, increments start 
 (defun buf-pop (b)
   (prog1 
       (bref b (incf (buf-start b)))
     (buf-reset b)))
 
+;; get the next value but don't remove it from the buffer b
 (defun buf-next (b)
   (when (< (buf-used b) (buf-new b))
     (bref b (incf (buf-used b)))))
 
+;; reset the buffer b, make used equal to start and new equal to end 
 (defun buf-reset (b)
   (setf (buf-used b) (buf-start b)
         (buf-new b) (buf-end b)))
 
+;; clear data form the buffer b 
 (defun buf-clear (b)
   (setf (buf-start b) -1 (buf-used b) -1
         (buf-new b) -1 (buf-end b) -1))
 
+;; flush a buffer by writing all the live elements to a stream given as the second argument
 (defun buf-flush (b str)
   (do ((i (1+ (buf-used b)) (1+ i)))
       ((> i (buf-end b)))
     (princ (bref b i) str)))
 
+;; read from file1 and substitute all old string to new string and write to file2
 (defun file-subst (old new file1 file2)
   (with-open-file (in file1 :direction :input)
     (with-open-file (out file2 :direction :output
                          :if-exists :supersede)
       (stream-subst old new in out))))
 
+;; the core working function, called by file-subst
 (defun stream-subst (old new in out)
   (let* ((pos 0)
          (len (length old))
