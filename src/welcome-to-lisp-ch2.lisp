@@ -1,5 +1,13 @@
 ;;;; 第二章的例子和练习
 
+;; ask for a number 
+(defun ask-number()
+  (format t "Please enter a number: ")
+  (let ((val (read)))
+    (if (numberp val)
+        val
+        (ask-number))))
+
 ;; ex-5 a
 ;; 判断列表x中是否有nil
 (defun enigma (x)

@@ -122,7 +122,7 @@
     
 
 ;; Exercises
-;; ex1
+;; ex1  returns a list of strings representing each line in the file.
 (defun file-to-lststr(file)
   (let ((acc nil))
     (with-open-file (str file :direction :input)
@@ -130,8 +130,9 @@
                  (read-line str nil 'eof)))
           ((eql line 'eof))
         (push line acc)))
-    (reverse acc)))
-;; ex2
+    (nreverse acc)))
+
+;; ex2 returns a list of the expressions in the file.
 (defun file-to-lstexp(file)
   (let ((acc nil))
     (with-open-file (str file :direction :input)
@@ -140,23 +141,29 @@
           ((eql exp 'eof))
         (push exp acc)))
     (reverse acc)))
-;; ex3
-(defun appendwithoutnotation(file1 file2)
-  (with-open-file (in file2 :direction :input)
-    (with-open-file (out file1 :direction :output
-                         :if-exists :append)
+
+;; ex3 remove the comments beginning #\%
+(defun remove-comments (to from)
+  (with-open-file (in from :direction :input)
+    (with-open-file (out to :direction :output
+                         :if-exists :append
+                         :if-does-not-exist :create)
       (do ((line (read-line in nil :eof)
                  (read-line in nil :eof)))
           ((eql line :eof))
-        (terpri out)
+        (fresh-line out)
         (princ (subseq line 0 (position #\% line)) out)))))
-;; ex4
+
+;; ex4  takes a two-dimensional array of floats and 
+;; displays it in neat columns,  Each element will be printed with 
+;; two digits after the decimal point, in a field 10 characters wide.
 (defun print-float-array (farr)
   (let ((dimens (array-dimensions farr)))
     (dotimes (i (first dimens))
       (dotimes (j (second dimens))
         (format t "~10,2,0,,' F" (aref farr i j)))
       (terpri))))
-;; ex5 wildcards "+"   reference the source file input-and-ouput-ex5.lisp
-;; ex6 reference the source file input-and-output-ex6.lisp
+
+;; ex5 wildcards "+" reference the source file ch7-ex5.lisp
+;; ex6 reference the source file ch7-ex6.lisp
 
