@@ -18,11 +18,11 @@
 ;;; We should understand the conception of ring buffer 
 ;;; ---------------------------------------------------
 ;; structure buf 
-;; It has 5 fields 
-;; vec -- a vector contaions the objects stored in the buffer 
+;; It has 5 fields: 
+;; vec -- a vector contaioning the objects stored in the buffer 
 ;; start -- pointing the first value in the buffer, will be incremented when pop a value 
 ;; end -- pointing the last value in the buffer, will be incremented when insert a value
-;; used and new are some information for the buffer 
+;; used and new are some information about the buffer, are like start and end for the "current match"
 ;; start <= used <= new <= end 
 (defstruct buf
   vec (start -1) (used -1) (new -1) (end -1))
@@ -45,9 +45,9 @@
 (defun buf-insert (x b)
   (setf (bref b (incf (buf-end b))) x))
 
-;; return the first value in the buffer, increments start 
+;; return the first value in the buffer, and increments start 
 (defun buf-pop (b)
-  (prog1 
+  (prog1
       (bref b (incf (buf-start b)))
     (buf-reset b)))
 
@@ -81,17 +81,17 @@
 
 ;; the core working function, called by file-subst
 (defun stream-subst (old new in out)
-  (let* ((pos 0)
+  (let* ((pos 0) ; 在old上此次循环要比较的字符的索引
          (len (length old))
-         (buf (new-buf len))
-         (from-buf nil))
+         (buf (new-buf len)) ; the length of the buffer is decided by the length of the old string
+         (from-buf nil)) ; storing a character from the buf
     (do ((c (read-char in nil :eof)
             (or (setf from-buf (buf-next buf))  ;; setf 会返回最后一个参数求值结果
                 (read-char in nil :eof))))
         ((eql c :eof))
-      (cond ((char= c (char old pos))
+      (cond ((char= c (char old pos))      ; 5 从buf中取得的字符，并且是部分相等，这是buffer真正有用的地方
              (incf pos)
-             (cond ((= pos len)            ; 3 字符相等 并且 现在是全部相等
+             (cond ((= pos len)            ; 3 字符相等 并且 现在是全部相等 这个是最简单的情况
                     (princ new out)
                     (setf pos 0)
                     (buf-clear buf))
@@ -101,14 +101,25 @@
              (princ c out)
              (when from-buf                ; 如果是从buf中获取的字符，需要pop出并重置
                (buf-pop buf)))
-            (t                             ; 4 之前有相等的，但是现在不相等了
+            (t                             ; 4 之前有相等的，但是现在这个字符不相等了
              (unless from-buf              ; 如果不是从buf中拿来的字符 需要加入到buf中，修改end
                (buf-insert c buf))         ; 这里就是为了保留火种！很巧妙，现在暂时不相等以后未必不相等，这个字符说不定和old的第一个字符相等
-             (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个取出来 这个时候buf中一定是有数据的！并且避免了死循环！
-             (setf pos 0))))
+             (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个字符取出来输出并从buffer中清理掉它 这个时候buf中一定是有数据的！并且避免了死循环！这句话是算法的一个核心，实际上，在buffer中如果之前匹配，但是碰上了一个不匹配的字符的时候，就必须去掉一个字符！如果有n个不匹配就去掉n个了，很好理解！
+             (setf pos 0)))) ; 既然碰到了不匹配的字符，就必须从old的开始索引0重新开始新一轮的匹配
     (buf-flush buf out)))
-;; CL-USER> (file-subst "baro" "baric" "a.txt" "b.txt")
+;; > (file-subst "baro" "baric" "a.txt" "b.txt")
 
+;; test file-subst
+(defun file-subst-test ()
+  (let ((origin-filename (make-pathname :name "origin.txt"))
+        (output-filename (make-pathname :name "output.txt")))
+    (with-open-file (origin origin-filename :direction :output
+                            :if-exists :supersede)
+      (dotimes (i 100000)
+        (princ "barbarous" origin)
+        (fresh-line origin)))
+    (file-subst "baro" "baric" origin-filename output-filename)))
+    
 
 ;; Exercises
 ;; ex1
