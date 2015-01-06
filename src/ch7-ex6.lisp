@@ -46,8 +46,9 @@
     (with-open-file (out file2 :direction :output
                          :if-exists :supersede)
       (stream-subst old new in out))))
+
 ;; here are 3 wild cards :
-;;    %a -- all char
+;;    %a -- all character
 ;;    %d -- 0-9
 ;;    %w -- a-zA-Z and 0-9
 ;;    %% -- #\%
