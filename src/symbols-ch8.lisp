@@ -16,16 +16,24 @@
         (|42| 4))
     (+ || |#\Newline| |42|)))
 
-;; define a package 
-;; the pacakge my-utilities must exist before compile 
-(defpackage "MY-APPLICATION"
-  (:use "COMMON-LISP" "MY-UTILITIES")
-  (:nicknames "APP")
-  (:export "WIN" "LOSE" "DRAW"))
-
-(in-package my-application)
 
 ;; error lexical variable is not bound to a symbol 
 (defun variable-symbol-test ()
   (let ((v 42))
     (symbol-value 'v)))
+;; but this is ok  name is a special variable 
+(defun variable-symbol-test2 ()
+  (setf name "will")
+  (symbol-value 'name))
+
+;;; to see the code of random test generater, open symbols-ch8-random-text.lisp
+
+
+;; Exercises
+;; ex1 Yes if they're in different packages
+;; ex2 "FOO" 3 bytes 'FOO name package variable function attribute-list 20+ bytes
+;; ex3 a serious question, if defpackage with symbol, the symbol is interned in the package implicitly
+;; ex4 reference to symbols-ex4.lisp
+;; ex5 read-text a Henley's poem to generate the *words*, then judge a string from the first words as prev found from *words* 
+
+
