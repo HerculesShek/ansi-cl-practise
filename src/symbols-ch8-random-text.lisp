@@ -5,16 +5,20 @@
   (:use "COMMON-LISP") ; the pacakge my-utilities is removed 
   (:nicknames "APP")
   (:export "WIN" "LOSE" "DRAW"))
-
+;; make my-application to be the current package 
 (in-package my-application)
 
+;; this function has no symbols belonging to my-application, 
+;; it can be used everywhere, because the keywords are special symbols 
 (defun noise (animal)
   (case animal
     (:dog :woof)
     (:cat :meow)
     (:pig :oink)))
 
-;; Random Text
+
+;;; Random Text
+;;; PART I read from text 
 (defparameter *words* (make-hash-table :size 10000))
 
 (defconstant maxword 100)
@@ -51,6 +55,7 @@
           (incf (cdr pair))))
     (setf prev symb)))
 
+;; PART II 
 ;; generate text
 (defun generate-text (n &optional (prev '|.|))
   (if (zerop n)
@@ -70,3 +75,4 @@
 
 (read-text "./text/lost.txt")
 (generate-text 15)
+

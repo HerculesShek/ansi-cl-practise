@@ -16,7 +16,6 @@
         (|42| 4))
     (+ || |#\Newline| |42|)))
 
-
 ;; error lexical variable is not bound to a symbol 
 (defun variable-symbol-test ()
   (let ((v 42))
@@ -31,7 +30,8 @@
 
 ;; Exercises
 ;; ex1 Yes if they're in different packages
-;; ex2 "FOO" 3 bytes 'FOO name package variable function attribute-list 20+ bytes
+;; ex2 "FOO" 3 bytes 
+;; 'FOO name package variable function attribute-list 20+ bytes
 ;; ex3 a serious question, if defpackage with symbol, the symbol is interned in the package implicitly
 ;; ex4 reference to symbols-ex4.lisp
 ;; ex5 read-text a Henley's poem to generate the *words*, then judge a string from the first words as prev found from *words* 
