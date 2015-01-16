@@ -72,7 +72,9 @@
       (if (minusp (decf i (cdr pair)))
           (return (car pair))))))
 
-
+;; the poem is here 
+;; http://www.gutenberg.org/cache/epub/26/pg26.txt
+;; or https://www.dartmouth.edu/~milton/reading_room/pl/book_1/text.shtml
 (read-text "./text/lost.txt")
 (generate-text 15)
 

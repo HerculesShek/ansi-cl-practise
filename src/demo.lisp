@@ -8,7 +8,7 @@
       1
       (+ (fabo (- n 1)) (fabo (- n 2))))) 
 
-;; 使用斐波纳契打印自然底数e
+;; TODO 使用斐波纳契打印自然底数e
 (defun print-e (n ht)
   
 
@@ -52,7 +52,7 @@
 (symbol-p-demo 'foo)
 
 
-;; calcute the sum of a word 
+;; calculate the sum of a word 
 ;; (sum-of-word "attitude")  =>  100
 (defun sum-of-word (w &optional (index 0))
   (typecase w

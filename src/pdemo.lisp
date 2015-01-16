@@ -1,3 +1,5 @@
+;;;; This source file for testing pacakge
+
 (defpackage "MATH"
   (:use "COMMON-LISP")
   (:nicknames "m")
