@@ -1,4 +1,4 @@
-;;;; 第二章的例子和练习
+;;;; source file for demos and practise of chapter 2 
 
 ;; ask for a number 
 (defun ask-number()
@@ -7,6 +7,41 @@
     (if (numberp val)
         val
         (ask-number))))
+
+;; show squares ranges [i, end]
+(defun show-squares-recursion(i end)
+  (if (> i end)
+      'done
+      (progn
+        (format t "~a ~a ~%" i (* i i))
+        (show-squares-recursion (+ i 1) end))))
+
+;; get the length of a list  
+(defun our-length (lst)
+  (let ((len 0))
+    (dolist (o lst)
+      (format t "~a~%" o)
+      (setf len (+ len 1)))
+    len))
+;; recursive 
+(defun our-length-r (lst)
+  (if (null lst)
+      0
+      (+ (our-length-r (cdr lst)) 1)))
+
+;;; Exercises
+;; ex-2 
+(cons 'a (cons 'b (cons 'c nil)))
+(cons 'a (cons 'b '(c)))
+(cons 'a '(b c))
+
+;; ex-3 
+(defun our-fourth (lst)
+  (car (cdr (cdr (cdr lst)))))
+
+;; ex-4 
+(defun larger (x y)
+  (if (> x y) x y))
 
 ;; ex-5 a
 ;; 判断列表x中是否有nil
@@ -30,6 +65,8 @@
 
 ;;; TODO 确认一下上面哪种递归是尾递归
 
+;; ex-6 car or apply
+
 ;; ex-7
 ;; 判断一个列表中是否包含列表 借鉴的是上面的函数 enigma
 (defun has-list (lst)
@@ -37,8 +74,7 @@
        (or (listp (car lst))
            (has-list (cdr lst)))))
 
-;; ex-8
-;; 给出函数的迭代与递归版本：
+;; ex-8 给出函数的迭代与递归版本：
 ;; ex-8 a 接受一个正整数，并打印出数字数量的点。
 (defun print-dot-iter (n)
   (do ((i 0 (+ i 1)))
@@ -59,15 +95,15 @@
     (dolist (o lst)
       (if (eql 'a o) (setf sum (+ 1 sum))))
     sum))
-
-;;; 这个是没有副作用（无setf）的迭代版本 很精巧！
+;; 下面这个是没有副作用（无setf）的迭代版本 很精巧！
 (defun a-rep (ls)
   (do ((ls1 ls (cdr ls1))
        (n 0 (+ n (if (eq (car ls1) 'a) 1 0))))
       ((not ls1) n)
     ;; 注意到这里 do 的body代码 是空的 
     ))
-;; 上面的do定义的第二个变量n，在迭代一次结束之后进行变化的时候，用到了第一个变量ls1，说明do在进行本地变量的update的时候也是按照顺序来的！-->也可以把第二个变量的定义部分当作do真正想做的事情。这种写法比C++中的for循环灵活多了！
+;; 上面的do定义的第二个变量n的update部分是真正与业务逻辑有关的事情。这种写法
+;; 比C++中的for循环灵活多了！
 ;; 递归版本
 (defun num-of-a-r (lst)
   (if lst
@@ -85,3 +121,4 @@
   (if lst
       (+ (if (numberp (car lst)) (car lst) 0) (summit-r (cdr lst)))
       0))
+

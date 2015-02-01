@@ -1,4 +1,4 @@
-;;;; this source file contains the solution for the ex5 of chapter 8
+;;;; This source file contains the solution for the ex5 of chapter 8
 
 ;;; In my opinion, this exercise inspects the single directed linked list
 ;;; To verify whether or not a quote was produced by Henley
@@ -14,8 +14,7 @@
   (with-open-file (s pathname :direction :input)
     (let ((buffer (make-string maxword))
           (pos 0))
-      (do ((c (read-char s nil :eof)
-              (read-char s nil :eof)))
+      (do ((c (read-char s nil :eof) (read-char s nil :eof)))
           ((eql c :eof))
         (if (or (alpha-char-p c) (char= c #\'))
             (progn 
@@ -42,32 +41,28 @@
           (incf (cdr pair))))
     (setf prev symb)))
 
-;; simple direction linked list 
+;;; simple direction linked list 
+;; get the first word and invoke the recursive function--henleyp-process 
 (defun henleyp-sentence (sen &optional (test #'my-char))
   (multiple-value-bind (first index) (next-w sen test 0)
     (if first
-        (let ((first-sym (intern (string-downcase first))))   ;; string-downcase can turn a char into a string  #\A => "a"
+        (let ((first-sym (intern (string-downcase first))))   ; string-downcase can turn a char into a string  (string-downcase #\A) => "a"
           (if (gethash first-sym *words*)
               (henleyp-process sen first-sym test index)
               nil)))))
 
-(defun tokens (sen test &optional (start 0)) ;; test next-w
-  (multiple-value-bind (word index) (next-w sen test start)
-    (when word
-      (format t "~A index is ~A   " word index)
-      (format t "length is ~A ~%" (if (characterp  word) 1 (length word)))
-      (if index
-          (tokens sen test index)))))
-
+;; working function -- recursive 
 (defun henleyp-process (sen pre-sym test start)
   (let ((choices (gethash pre-sym *words*)))
     (multiple-value-bind (next index) (next-w sen test start)
-      (let ((next-sym (intern (string-downcase next))))    ;; string-downcase can turn a char into a string  #\A => "a"
+      (let ((next-sym (intern (string-downcase next))))
         (if (and next (member next-sym choices :key #'car))
             (if (null index)
                 t
                 (henleyp-process sen next-sym test index)))))))
 
+;; Get the first word or punctuation of sen from start 
+;; and the index for getting the next word 
 (defun next-w (sen test start)
   (let ((p1 (position-if test sen :start start)))
     (if p1
@@ -80,6 +75,15 @@
               (values (subseq sen p1 p2) p2)))
         (values nil nil))))
 
+;; test next-w
+(defun tokens (sen  &optional (test #'my-char) (start 0)) 
+  (multiple-value-bind (word index) (next-w sen test start)
+    (when word
+      (format t "~A index is ~A   " word index)
+      (format t "length is ~A ~%" (if (characterp  word) 1 (length word)))
+      (if index
+          (tokens sen test index)))))
+
 (defun my-char (c)
   (or (alpha-char-p c)
       (char= c #\')
@@ -87,11 +91,13 @@
 
 
 
-
-;; from takafumi@shido.info
+;;; Another solution
+;;; The following code is from takafumi@shido.info, The code is too stiff, 
+;;; so I have not read it, and it was just pasted here
 (defconstant maxword 100)
 
-(defun punc (c) ;; char -> symbol
+;; char -> symbol
+(defun punc (c) 
   (case c
     (#\. '|.|) (#\, '|,|) (#\; '|;|)
     (#\! '|!|) (#\? '|?|) ))
@@ -104,8 +110,7 @@
   (let ((buffer (make-string maxword))
         (pos 0) (nwls nil) (nw 0))
     (with-open-file (s fi :direction :input)
-      (do ((c (read-char s nil :eof)
-              (read-char s nil :eof)))
+      (do ((c (read-char s nil :eof) (read-char s nil :eof)))
           ((eql c :eof))
         (if (or (alpha-char-p c) (char= c #\'))
             (progn
@@ -128,6 +133,7 @@
   (let ((p (truncate (- x mn) r)))
     (if (= p n) (- p 1) p)))
 
+;; get a string containing n star 
 (defun nstar (n)
   (make-string n :initial-element #\*))
 

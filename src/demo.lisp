@@ -1,20 +1,17 @@
 ;;;; 此文档是手记，想到的测试的东西都放在这个文件中
 
-;;; 返回斐波纳契数列的第n个数字 
+;;; 返回斐波纳契数列的第n个数字
 ;;;  1 2 3 4 5 ...
 ;;;  1 1 2 3 5 ...
 (defun fabo (n)
   (if (<= n 2)
       1
-      (+ (fabo (- n 1)) (fabo (- n 2))))) 
+      (+ (fabo (- n 1)) (fabo (- n 2)))))
 
 ;; TODO 使用斐波纳契打印自然底数e
 (defun print-e (n ht)
-  
+  )
 
-;;; the main method  
-(defun main()
-  (labels-test))
 
 (defun re-test()
   (return-from re-test 'a))
