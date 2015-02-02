@@ -1,4 +1,4 @@
-;;;; 第四章的例子和练习代码
+;;;; this source file contains all the demos and exercises in chapter 4
 
 ;; 对顺序排列的 vec 进行二叉搜索
 (defun bin-search (obj vec)

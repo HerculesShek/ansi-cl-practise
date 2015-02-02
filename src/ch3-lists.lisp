@@ -1,20 +1,35 @@
-;;;; 本文档主要用于第三章的所有实例和练习
+;;;; this source file contains all the demos and exercises in chapter 3 
+
+;; whether x is a list 
+(defun our-listp (x)
+  (or (null x) (consp x)))
+
+;; whether x is a atom 这里看出，lisp中的对象不是atom就是cons
+(defun our-atom (x)
+  (not (consp x)))
+
+;; copy a list
+(defun our-copy-list (lst)
+  (if (atom lst)
+      lst
+      (cons (car lst) (our-copy-list (cdr lst)))))
 
 ;; list compress (1 1 0 1 0 0 1)  ==> ((2 1) 0 1 (2 0) 1)
 (defun compress (x)
   (if (consp x)
       (compr (car x) 1 (cdr x))
       x))
-
+;; TODO compr 是不是尾递归？
 (defun compr (elt n lst)
-  (if (null lst)
+  (if (null lst) ; base case 
       (list (n-elts elt n))
       (let ((next (car lst)))
         (if (equal elt next)
             (compr elt (+ n 1) (cdr lst))
-            (cons (n-elts elt n) 
+            (cons (n-elts elt n)
                   (compr next 1 (cdr lst))))))) ; 如果cons的第二个参数是list的话，就是把第一个参数添加到这个列表的开头
-;; TODO compr 是不是尾递归？
+;; > (n-elts 2 1) => 2  
+;; > (n-elts 2 3) => (3 2)
 (defun n-elts (elt n)
   (if (> n 1)
       (list n elt)
@@ -22,21 +37,40 @@
 
 ;; 解压 (uncompress '((3 r) u (2 0) p (2 t))) => (R R R U 0 0 P T T)
 (defun uncompress (lst)
-  (if (null lst)
+  (if (null lst) ; base case 
       nil
       (let ((elt (car lst))
-            (rest (uncompress (cdr lst)))) ; 这里的这种递归方式是不是就是尾递归？
+            (rest (uncompress (cdr lst)))) ; 这里的这种递归方式是不是尾递归？
         (if (consp elt)
             (append (apply #'list-of elt) rest) ; 这里的apply的传参很灵活
             (cons elt rest)))))
-
+;; > (list-of 2 'a) => (A A)
 (defun list-of (n elt)
   (if (zerop n)
       nil
       (cons elt (list-of (- n 1) elt))))
 
+;; the nth cdr of a list 
+(defun our-nthcdr (n lst)
+  (if (zerop n)
+      lst
+      (our-nthcdr (- n 1) (cdr lst))))
 
-;; copy a tree
+;; the last n cdr of a list 
+(defun our-last (lst &optional (n 1))
+  (if (atom lst)
+      lst
+      (nthcdr (if (minusp (- (num-cons lst) n))
+                  0
+                  (- (num-cons lst) n))
+              lst)))
+;; calculate the number of cons in a list 
+(defun num-cons (lst)
+  (if (atom lst)
+      0
+      (+ 1 (num-cons (cdr lst)))))
+
+;; copy a tree 注意和函数 our-copy-list 的区别
 (defun my-copy-tree (root)
   (if (atom root)
       root
@@ -86,6 +120,13 @@
       (push elt acc))
     acc))
 
+;; 判断一个列表是不是正规列表--proper list
+;; 其实这个不严格，因该加入排除环形列表--circular list
+(defun proper-list? (lst)
+  (or (null lst)
+      (and (consp lst)
+           (proper-list? (cdr lst)))))
+
 ;; 自定义assoc 判断一个关联列表中是否包含指定的键值
 (defun our-assoc (key lst)
   (and (consp lst)
@@ -119,7 +160,7 @@
 (defun new-paths (path node net)
   (mapcar #'(lambda (x) (cons x path))
           (cdr (assoc node net))))
-
+;; 测试函数
 (defun bfs-test ()
   (let ((net '((a b c) (b c) (c d))))
     (shortest-path 'a 'd net)))
@@ -133,6 +174,13 @@
     (dolist (e a)
       (setf x (remove e x)))
     (append a x)))
+;; 使用member和push的版本：
+(defun new-union (a b)
+  (let ((ra (reverse a)))
+    (dolist (x b)
+      (if (not (member x ra))
+          (push x ra)))
+    (reverse ra)))
 
 ;;; ex3 返回列表中每个元素出现的次数，并排序 
 ;;; (occurrences '(a b c 1 v a b 4)) 
@@ -148,7 +196,8 @@
         (sort occ #'> :key #'cdr))
       lst))
 ;; 同时，assoc返回的也是个引用，而不是副本，方便修改
-;; 上面的 (setf (cdr ac) (+ 1 (cdr ac))) 是可以写成 (incf (cdr ac)) incf 函数的作用就是让某个变量的值加1 而decf则是减1
+;; 上面的 (setf (cdr ac) (+ 1 (cdr ac))) 是可以写成 (incf (cdr ac)) 
+;; incf 函数的作用就是让某个变量的值加1 而decf则是减1
 
 ;; ex4 因为member默认使用的是eql比较规则 :test #'equal
 
@@ -243,7 +292,7 @@
   (if (= 1 n)
       elt
       (cons n elt))) ; just change this piece
-;; 这里还得看一下 list 函数的原理！
+;; 这里重温一下 list 函数的原理！
 
 
 ;; ex8  > (showdots '(a b c)) ==> (A . (B . (C . nil)))
@@ -258,14 +307,14 @@
         (format t ")"))))
 
 ;; ex9
-;; 写一个程序来找到 3.15 节里表示的网络中，最长有
-;; 限的路径(不重复)。网络可能包含循环。
+;; 写一个程序来找到 3.15 节里表示的网络中，最长有限的路径(不重
+;; 复)。网络可能包含循环。
 (defparameter *net* '((a b c) (b a c) (c a b d) (d c)))
 
 (defun longest-path (start end net)
   (bfs end (list (list start)) nil net))
 
-;; res stores all the path starting from 'start' and ending with 'end'
+;; res stores all the paths starting from 'start' and ending with 'end'
 (defun bfs (end queue res net)
   (if queue
       (let ((path (car queue)))
