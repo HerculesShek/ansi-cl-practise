@@ -6,7 +6,7 @@
     (and (not (zerop len))
          (finder obj vec 0 (- len 1)))))
 
-;; 闭区间 start and end are indexes
+;; 闭区间[start, end] start and end are indexes
 (defun finder (obj vec start end) 
   (let ((range (- end start)))
     (if (zerop range) ; 区间内只有一个元素 base case
@@ -21,7 +21,7 @@
                     (finder obj vec start (- mid 1))
                     obj)))))))
 
-;; 针对向量的回文判断
+;; 针对向量的回文判断 elt版本
 (defun mirror? (s)
   (do ((forward 0 (+ forward 1))
        (back (- (length s) 1) (- back 1)))
@@ -30,10 +30,11 @@
                      (elt s back))))
        (>= forward back))))
 
-;; 将字符串分段，取出第二部分
+;; split a string and get the second word 
 (defun second-word (s)
-  (let ((p1 (+ (position #\  s) 1))) ; 空格的表示“#\ ”
-    (subseq s p1 (position #\  s :start p1))))
+  (let ((p1 (position #\  s))) ; 空格的表示"#\ "
+    (if p1
+        (subseq s (+ p1 1) (position #\  s :start (+ 1 p1))))))
 
 ;;; 下面是解析日期的部分
 ;; 根据规则将字符串分割 (tokens "30 Nov 2014" #'constituent 0) 
@@ -50,7 +51,7 @@
 ;; 判断字符是不是可以显示的字符，不包含空格
 (defun constituent (c)
   (and (graphic-char-p c)
-       (not (char= c #\Space))))
+       (not (char= c #\Space)))) ; 空格的表示2种方式"#\ "
 
 ;; 日期转换函数，入口 (parse-date "30 Nov 2014") => (30 11 2014)
 (defun parse-date (date-str)
