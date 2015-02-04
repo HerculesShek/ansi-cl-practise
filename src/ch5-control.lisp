@@ -1,4 +1,4 @@
-;;;; 第五章的例子和所有的练习
+;;;; this source file contains all demos and exercises of chapter 5
 
 ;; return test
 (dolist (x '(a b c) x)
@@ -16,13 +16,13 @@
           (return 42)))))
 
 ;; str->integer :return-from
-(defun read-integer (str)
+(defun str->integer (str)
   (let ((accum 0))
     (dotimes (pos (length str))
       (let ((i (digit-char-p (char str pos))))
         (if i
             (setf accum (+ (* accum 10) i))
-            (return-from read-integer nil))))
+            (return-from str->integer nil))))
     accum))
 
 ;; tagbody test 
@@ -35,7 +35,7 @@
      (if (< x 10) 
          (go top))))
 
-;; :cond and if
+;; cond and if
 (defun our-member (obj lst)
   (if (atom lst)
       nil
@@ -47,12 +47,14 @@
         ((eql obj (car lst)) lst)
         (t (our-member-cond obj (cdr lst)))))
 
-;; :case 
+;; case 
 (defun month-length (mon)
   (case mon
     ((jan mar may jul aug oct dec) 31)
     ((apr jun sept nov) 30)
-    (feb (if (leap? (progn (format t "Please enter the year:~%") (read))) 29 28))
+    (feb (if (leap? 
+              (progn (format t "Please enter the year:~%") (read))) 
+             29 28))
     (otherwise "unknown month")))
 ;; leap year?
 (defun leap? (y)
@@ -60,17 +62,27 @@
        (or (zerop (mod y 400))
            (not (zerop (mod y 100))))))
 
-;; :typecase
+;; typecase
 (defun what-is-it (x)
   (format t "~&~S is ~A.~%"
           x (typecase x
+              (simple-base-string "a string")
+              (integer "an integer")
               (float "a float")
               (null "a symbol, boolean false, or the empty list")
               (list "a list")
+              (hash-table "a hash-table")
               (t (format nil "a(n) ~(~A~)" (type-of x))))))
+(defun wii-test ()
+  (map nil #'what-is-it (list "abc" 99 'a 33.23 3/5 :rt :4 #\a nil
+                              (make-hash-table)
+                              (vector 1 2)
+                              (list "a" 'b)
+                              (make-array '(2 2)))))
+
 
 ;;; do 测试return go return-from 
-;; CL-USER> (do-return-test )
+;; > (do-return-test )
 ;; i is 1
 ;; i is 2
 ;; i is 3
@@ -81,7 +93,7 @@
     (format t "i is ~A~%" i)
     (if (= i 3)
         (return 99))))
-;; CL-USER> (do-return-from-test )
+;; > (do-return-from-test )
 ;; i is 1
 ;; i is 2
 ;; i is 3
@@ -93,7 +105,8 @@
     (if (= i 3)
         (return-from nil 99))))
 ;; 打印九九乘法表
-;; 这说明do的body部分是在一个tagbody中的 
+;; 这说明do的body部分是在一个tagbody中的
+;; tagbody给出了在一层循环中写双层循环的方式，但是不推荐使用
 (defun do-go-test ()
   (do ((i 1 (incf i)))
       ((= i 10) 'done)

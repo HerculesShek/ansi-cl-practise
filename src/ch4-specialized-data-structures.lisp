@@ -39,12 +39,12 @@
 ;;; 下面是解析日期的部分
 ;; 根据规则将字符串分割 (tokens "30 Nov 2014" #'constituent 0) 
 ;; => ("30" "Nov" "2014")
-(defun tokens (str test start)
+(defun tokens (str &optional (test #'constituent) (start 0))
   (let ((p1 (position-if test str :start start)))
     (if p1
         (let ((p2 (position-if #'(lambda (c)
                                    (not (funcall test c)))
-                               str :start p1)))
+                               str :start (+ p1 1))))
           (cons (subseq str p1 p2)
                 (if p2
                     (tokens str test p2)))))))
@@ -98,7 +98,7 @@
   (if (null bst)
       (make-node :elt obj)
       (let ((elt (node-elt bst)))
-        (if (eql elt obj) ;; 已经存在此元素则不再插入
+        (if (eql elt obj) ; 已经存在此元素则不再插入 base case
             bst
             (if (funcall < obj elt)
                 (make-node :elt elt
@@ -190,8 +190,8 @@
       (format t "~%max:~t~A" (bst-max nums))
       (format t "~%before remove:~%print:~%")
       (print-bst nums)
-      (format t "bst-traverse:")
-      (bst-traverse #'(lambda (x) (format t "~A " x)) nums)
+      (format t "bst-traverse: ")
+      (bst-traverse #'(lambda (x) (format t "~A, " x)) nums)
       (setf nums (bst-remove 2 nums #'<))
       (format t "~%after remove 2:~%print:~%")
       (print-bst nums)
@@ -199,6 +199,7 @@
       (bst-traverse #'princ nums))))
 
 ;; labels
+;; return k*n
 (defun recursive-times (k n)
   (labels ((temp (n) 
              (if (zerop n) 0 (+ k (temp (1- n))))))
@@ -213,7 +214,7 @@
 ;; Exercises
 ;; ex1
 ;; 这里主要是找到一个规律
-;; 思路是在旋转的时候把原来的一个整行当作一个整体考虑
+;; 在旋转的时候把原来的一个整行当作一个整体考虑
 ;; 坐标的值：
 ;;   顺时针旋转一个正方的二维数组的话，原来的列坐标变为现在的行坐标
 ;; 正方形的行数-1-原来的列坐标变为现在的行坐标 即可 
@@ -228,31 +229,41 @@
            new-arr))))
 
 ;; ex2
-;; a
+;; a-V1 define copy-list using append 
 (defun my-copy-list-append (lst)
-  (reduce #'(lambda (lst obj) (append lst (list obj))) lst :initial-value nil))
+  (reduce #'(lambda (lst obj) (append lst (list obj))) 
+          lst :initial-value nil))
+;; a-V2 define copy-list using cons
 (defun my-copy-list-cons (lst)
   (reduce #'cons lst :from-end t :initial-value nil))
 ;; (reduce #'(lambda (a lst) (cons a lst)) '(a b c) :from-end t :initial-value nil)
-;; 从此处看出，默认是左结合，加入 :from-end t 之后，变为了右结合，这时候要一定注意上面lambda中的参数的顺序，左结合的时候上次的结果作为第一个参数，右结合的时候作为第二个参数！
+;;; 从此处看出，默认是左结合，加入 :from-end t 之后，变为了右结
+;;; 合，这时候要一定注意上面lambda中的参数的顺序，左结合的时候上
+;;; 次的结果作为第一个参数，右结合的时候作为第二个参数！
 
-;; b
+;; b define reverse using cons
 (defun my-reverse (lst)
-  (reduce #'(lambda (lst obj) (cons obj lst)) lst :initial-value nil))
+  (reduce #'(lambda (lst obj) (cons obj lst)) 
+          lst :initial-value nil))
 
-;; ex3
+;; ex3 Define a structure to represent a tree where each node 
+;; contains some data and has up to three children.  Define 
 (defstruct my-node
   elt 
   left
   middle
   right)
-
+;; (a) Define a function to copy such a tree (so that no node 
+;; in the copy is eql to a node in the original) 
 (defun copy-t (tree)
   (and tree
        (make-my-node :elt (my-node-elt tree)
                      :left (copy-t (my-node-left tree))
                      :middle (copy-t (my-node-middle tree))
                      :right (copy-t (my-node-right tree)))))
+;; (b) Define a function that takes an object and such a tree, 
+;; and returns true if the object is eql to the data field of 
+;; one of the nodes 
 (defun value-test (obj tree)
   (if tree
       (or
@@ -261,13 +272,17 @@
        (value-test (my-node-middle tree) obj)
        (value-test (my-node-right tree) obj))))
 
+;;; ex4: Define a function that takes a BST and returns a list 
+;;; of its elements ordered from greatest to least. 
 ;; ex4-v1 注意 ex4要求返回的列表是由大到小
 (defun bst-ordered-list (bst)
   (if bst
       (append (bst-ordered-list (node-r bst))
               (list (node-elt bst))
               (bst-ordered-list (node-l bst)))))
-;; ex4-v2
+;;; 练习4的V2和V3版本是在函数的参数中蕴藏玄机，这样子定义的
+;;; 递归函数从形参上进行思考就十分的好理解
+;; ex4-V2
 (defun bst->list (bst0)
   (labels ((rec (bst1 acc)
              (if bst1
@@ -276,7 +291,7 @@
                             (rec (node-l bst1) acc)))
                  acc)))
     (rec bst0 nil)))
-;; ex4-v3
+;; ex4-V3
 (defun bst->lst (bst0)
   (labels ((rec (bst1 acc)
              (if bst1
@@ -295,18 +310,18 @@
         (dolist (e a)
           (setf (gethash (car e) h) (cdr e)))
         h)))
-;; b-v1
+;; b-V1
 (defun hash->assoc (h)
   (if h
-      (let ((lst nil)) ; (let ((lst))
+      (let ((lst nil)) ; (let (lst)
         (maphash #'(lambda (k v)
                      (setf lst (cons (cons k v) lst)))
                  h)
         lst)))
-;; b-v2
+;; b-V2
 (defun hash->lst (ht)
-  (let ((acc nil))
+  (let ((acc nil)) ; (let (acc)
     (maphash #'(lambda (k v) (push (cons k v) acc)) ht)
     acc))
-;; push is more effective than cons a obj to a list
+;; push is more effective than consing a obj to a list
 
