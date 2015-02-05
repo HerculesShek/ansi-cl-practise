@@ -143,10 +143,10 @@
       (format t "(~A ~A) " x y))
     x))
 
-;; :do* test
+;; do* test
 (defun do*-test ()
   (do* ((x 1 (+ y 1))
-        (y x (+ 1 x)))
+        (y (+ x 1) (+ 1 x)))
        ((> x 5))
     (format t "(~A ~A) " x y)))
 (defun do*-test-1 ()
@@ -155,7 +155,7 @@
        ((> x 5))
     (format t "(~A ~A) " x y)))
 
-;; :mapc
+;; mapc
 (defun mapc-test()
   (mapc #'(lambda (x y z)
             (format t "~A ~A ~S, " x y z))
@@ -163,10 +163,15 @@
         '(hop flop slop top)
         '(1 2 3 4)))
 
-;; multiple-value-bind test 
+;; values 是访问器 个人认为作为访问器意义不大
+(defun values-test ()
+  (setf (values a b c) (values 42 "Jack" :good))
+  (list a b c))
+
+;; multiple-value-bind test print time 
 (defun multiple-value-bind-test ()
   (multiple-value-bind (s m h) (get-decoded-time)
-    (format t "time is ~A:~A:~A" h m s)))
+    (format t "time is ~2,'0d:~2,'0d:~2,'0d" h m s)))
 
 ;; :catch :throw
 (defun super ()
@@ -208,6 +213,33 @@
        (throw 'up (incf n 5))
     (format t "u-sub is still going...~%")
     (format t "n is ~A" (incf n 3))))
+
+;; unwind-protect test #3
+(defun up-test-lst ()
+  (let ((lst '(10)))
+    (setf lst (catch 'up
+                (u-sub-lst lst)
+                42))
+    lst))
+(defun u-sub-lst (lst)
+  (unwind-protect
+       (throw 'up (push 40 lst))
+    (format t "u-sub-lst is still going....~%")
+    (format t "n is ~A" (incf (car lst) 2))))
+
+
+;; unwind-protect test #4
+(defun up-test-lst ()
+  (let ((lst '(10)))
+    (setf lst (catch 'up
+                (u-sub-lst lst)
+                42))
+    lst))
+(defun u-sub-lst (lst)
+  (unwind-protect
+       (throw 'up (push 40 lst))
+    (format t "u-sub-lst is still going....~%")
+    (format t "n is ~A" (incf (car lst) 2))))
 
 
 ;;; Date Arithmetic
