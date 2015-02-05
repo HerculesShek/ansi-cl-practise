@@ -27,13 +27,13 @@
 
 ;; tagbody test 
 (defun tagbody-test ()
-  (tagbody
-     (setf x 0)
-   top
-     (incf x)
-     (format t "~A " x)
-     (if (< x 10) 
-         (go top))))
+  (let ((x 0))
+    (tagbody
+     top
+       (incf x)
+       (format t "~A " x)
+       (if (< x 10) 
+           (go top)))))
 
 ;; cond and if
 (defun our-member (obj lst)
@@ -229,33 +229,42 @@
 
 
 ;; unwind-protect test #4
-(defun up-test-lst ()
+(defun up-test-list ()
   (let ((lst '(10)))
     (setf lst (catch 'up
-                (u-sub-lst lst)
+                (u-sub-list lst)
                 42))
     lst))
-(defun u-sub-lst (lst)
+(defun u-sub-list (lst)
   (unwind-protect
-       (throw 'up (push 40 lst))
-    (format t "u-sub-lst is still going....~%")
+       (format t "u-sub-list is still going....~%")
+    (throw 'up (push 40 lst))
     (format t "n is ~A" (incf (car lst) 2))))
 
 
 ;;; Date Arithmetic
 ;; 借助这个向量 [start, end) 
 (defconstant month #(0 31 59 90 120 151 181 212 243 273 304 334 365)) 
-;; the year of 2000 is based 
+;; the year of 2000 is based 约定2000年1月1日为坐标原点，为第0天
 (defconstant yzero 2000)
-;; first part : transfer date to a number 
-;; date -> num 
-(defun day->num (d m y)
-  (+ (- d 1) (month-num m y) (year-num y)))
+;;; first part : transfer date to a number 
+;;; (day->num 5 2 2015) => 5514
+(defun date->num (d m y)
+  (and (date-validp d m y)
+       (+ (- d 1) (month-num m y) (year-num y))))
+;;判断日期的合法性 
+(defun date-validp (d m y)
+  (and (every #'integerp (list d m y))
+       (< 0 m 13)
+       (case m
+         ((1 3 5 7 8 10 12) (< 0 d 32))
+         ((4 6 9 11) (< 0 d 31))
+         ((2) (< 0 d (if (leap? y) 30 29))))))
 ;; how many days before the month of m in the year of y
 (defun month-num (m y)
   (+ (svref month (- m 1))
      (if (and (> m 2) (leap? y)) 1 0)))
-;; haw many days between the year of y and 2000
+;; how many days between the year of y and 2000
 (defun year-num (y)
   (let ((d 0))
     (if (>= y yzero)
@@ -267,12 +276,13 @@
 (defun year-days (y)
   (if (leap? y) 366 365))
 
-;; second part: transfer a number to a date
-;; num -> date
+;;; second part: transfer a number to a date
+;;; num -> date
 (defun num->date (n)
-  (multiple-value-bind (y left) (num-year n)
-    (multiple-value-bind (d m) (num-month left y)
-      (values d m y))))
+  (and (integerp n)
+       (multiple-value-bind (y left) (num-year n)
+         (multiple-value-bind (d m) (num-month left y)
+           (values d m y)))))
 ;; use a number to calculate the year
 (defun num-year (n)
   (if (> n 0)
@@ -301,7 +311,7 @@
 
 ;;; Exercises
 ;; 1-a
-((lambda (x) (cons x x)) (cdr y))
+((lambda (x) (cons x x)) (car y))
 ;; 1-b
 ((lambda (w)
    (lambda (y)
@@ -309,20 +319,22 @@
    (+ w 2))
  (car x))
 
-;; 2
+;; 2 获取x在y中首次出现的位置
 (defun mystery (x y)
   (cond 
     ((null y) nil)
     ((eql (car y) x) 0)
     (t (let ((z (mystery x (cdr y))))
          (and z (+ z 1))))))
+
 ;; 3
 (defun square (x)
   (if (and (< 0 x 6) (integerp x))
       x
       (* x x)))
+
 ;; 4 Rewrite num-month to use case instead of svref.
-(defun month-num-case-svref(m y)
+(defun month-num-case(m y)
 	(+ (case m
        (1 0)
        (2 31)
@@ -339,9 +351,13 @@
        (13 365))
      (if (and (> m 2) (leap? y)) 1 0)))
 
-;; 5 iteration
+;;; ex5 定义一个迭代与递归版本的函数，接受一个对象x与向量v，并返回一个
+;;; 列表，包含了向量v当中，所有直接在x之前的对象：
+;; ex5 iteration
 ;; process string sequece and vector 
-;; transfer string or sequence to vector because of svref 
+;; transfer string or sequence to vector because of using svref 
+;; 可以看出，string或者是sequence都可以转为simple-vector，代码中的
+;; 'vector 可以换作 ’simple-vector 
 (defun precedes-iter (obj v)
   (typecase v
     (simple-base-string (precedes-iter obj (concatenate 'vector v)))
@@ -350,30 +366,35 @@
            (len (length v)))
        (dotimes (i (1- len) pres)
          (if (eql (svref v (1+ i)) obj)
-             (pushnew (svref v i) pres)))))
+             (pushnew (svref v i) pres))))) ; avoid duplicates 
     (sequence (precedes-iter obj (concatenate 'vector v)))))
-;; 5 recursive
+;; ex5 recursive
 (defun precedes-recur (obj v)
   (typecase v
-    (simple-base-string (pre obj (concatenate 'vector v) 0 nil))
-    (vector (pre obj v 0 nil))
-    (sequence (pre obj (concatenate 'vector v) 0 nil))))
-(defun pre (obj v n pres)
-  (if (= n (- (length v) 1))
+    (simple-base-string 
+     (pre obj (concatenate 'vector v) (- (length v) 1) 0 nil))
+    (vector 
+     (pre obj v (- (length v) 1) 0 nil))
+    (sequence 
+     (pre obj (concatenate 'vector v) (- (length v) 1) 0 nil))))
+(defun pre (obj v len n pres)
+  (if (= n len)
       pres
       (progn 
         (if (eql obj (svref v (+ 1 n)))
             (pushnew (svref v n) pres))
-        (pre obj v (+ n 1) pres))))
+        (pre obj v len (+ n 1) pres))))
 
-;; 6 iteration
+;;; ex6 定义一个迭代与递归版本的函数，接受一个对象与列表，并返回
+;;; 一个新的列表，在原本列表的对象之间加上传入的对象
+;; ex6 iteration
 (defun intersperse (obj lst)
   (let (res)
     (dolist (e lst)
       (push e res)
       (push obj res))
     (reverse (subseq res 1))))
-;; 6 recursive
+;; ex6 recursive
 (defun intersperse-r (obj lst)
   (if (consp lst)
       (cons (car lst) (inter obj (cdr lst)))))
@@ -381,17 +402,17 @@
   (and lst
        (append (list obj (car lst)) (inter obj (cdr lst)))))
 
-;; 7 (a)
+;; ex7 (a) 递归
 (defun compare-pair-recur (lst)
   (and (listp lst)
        (every #'numberp lst)
        (< 1 (length lst))
        (cpr-u lst)))
-(defun cpr-u(lst)
+(defun cpr-u (lst)
   (or (null (cdr lst))
       (and (= 1 (abs (- (car lst) (cadr lst))))
            (cpr-u (cdr lst)))))
-;; 7 (b)
+;; ex7 (b) do 
 (defun compare-pair-do (lst)
   (and (listp lst)
        (every #'numberp lst)
@@ -400,7 +421,7 @@
             (flag (= 1 (abs (- (car lst) (cadr lst))))
                   (= 1 (abs (- (car rest) (cadr rest))))))
            ((or (not flag) (null (cdr rest))) flag))))
-;; 7 (c)
+;; ex7 (c) mapc & return
 (defun compare-pair-mapc (lst)
   (and (listp lst)
        (every #'numberp lst)
@@ -413,9 +434,15 @@
                          (return nil)))
                  (cdr lst))
            t))))
-;; 8
+
+;; ex8 定义一个单递归函数，返回两个值，分别是向量的最大与最小值。
 (defun extrame (v)
-  (extrame-exc 0 (length v) v (svref v 0) (svref v 0)))
+  (let* ((len (length v))
+         (first (if (> len 0) (svref v 0) nil)))
+    (cond 
+      ((= 0 len) (values nil nil))
+      ((= 1 len) (values first first))
+      (t (extrame-exc 1 (length v) v first first)))))
 (defun extrame-exc (i n v min max)
   (if (= i n)
       (values min max)
@@ -435,10 +462,11 @@
       (let* ((path (car queue)) (node (car path)))
         (bfs end
              (append (cdr queue)
-                     (new-paths path node net end)) ;; 在函数调用的时候，参数自求值也是可以打断函数调用的！
+                     (new-paths path node net end)) ; 在函数调用的时候，参数自求值也是可以打断函数调用的！
              net))))
 
-(defun new-paths (path node net end) ;; throw when found
+;; throw when found
+(defun new-paths (path node net end) 
   (mapcar #'(lambda (n)
               (let ((curr-path (cons n path)))
                 (if (eql n end)
@@ -446,8 +474,31 @@
                     curr-path)))
           (cdr (assoc node net))))
 
-;; 9 b TODO
-
+;; 9 b version without catch and throw but tagbody
+(defun shortest-path (start end net)
+  (and (consp net)
+       (if (eql start end)
+           (list start)
+           (let ((queue (list (list start)))
+                 (res nil))
+             (tagbody
+              bfs
+                (let* ((path (pop queue)) (node (car path)))
+                  (setf queue
+                        (append (cdr queue)
+                                (mapcar #'(lambda (n)
+                                            (let ((curr-path (cons n path)))
+                                              (if (eql n end)
+                                                  (progn
+                                                    (setf res (reverse curr-path))
+                                                    (go found))
+                                                  curr-path)))
+                                        (cdr (assoc node net))))))
+                (if queue
+                    (go bfs))
+              found
+                (format t "the shortest path is found!"))
+             res))))
 
 ;;; Other Demo fo Lisp research
 ;; function variable context test
