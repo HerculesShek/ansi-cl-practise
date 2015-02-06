@@ -1,4 +1,4 @@
-;;;; for demos and practise in the chapter 6
+;;;; for demos and practise in chapter 6
 
 ;; symbol-function
 (defun symbol-function-test ()
@@ -46,35 +46,48 @@
                     (format t "~A*~A=~A~%" i j (* i j))
                     (rec (incf i) (incf j))))))
     (rec 1 1)))
-                   
-;; rest demo
+
+;;; rest demo
+;; 查看剩余参数的类型
 (defun do-rest (&rest args)
   (type-of args))
+;; 剩余参数实际上是个proper list或nil
 (defun rest-demo(&rest args)
   args)
 ;; funcall implementation of apply
 (defun our-funcall (fn &rest args)
   (apply fn args))
 
+;;; &optional test 
 ;; optional demo #1
 (defun optional-1 (&optional arg)
   (list arg))
 ;; optional demo #2
 (defun do-optional1(&optional (a 'fun)  b)
   (list a b))
+;; optional demo #3 &optional的一种灵活用法
+(defun opt-free-var ()
+  (let ((var 5))
+    (labels ((my-fun (num1 &optional (num2 (+ var 5)))
+               (+ num1 num2)))
+      (list (my-fun 4) (incf var 3) (my-fun 5) (my-fun 40 2)))))
 
 ;; rest and optional
 (defun rest-optional-test (&optional (a "Will") b &rest c)
   (append (list a b) c))
 
-;;; &key demo
-;; default keyword parameter is nil
+;;; &key demo #0
+;;; default keyword parameter is nil
+;;; 注意调用顺序，绝对不能这么使用：
+;;; > (key-test :b 'bb :c 'cc 'a)
 (defun key-test (a &key b c)
   (list a b c))
-;; &key and &rest #1 OK &key can not be followed by &rest
+
+;; &key and &rest #1 OK 
 (defun key-rest-test (a &key b (name "Will"))
   (list a b name))
-;; &key and &rest #2 error! Can't compile the function!
+;; &key and &rest #2 error! Can't compile the function !
+;; &key can not be followed by &rest !!
 (defun key-rest-test-err (a &key b (name "Will") &rest res)
   (list a b name res))
 ;; &key and &optional test error! 
