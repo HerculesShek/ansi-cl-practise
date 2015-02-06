@@ -83,17 +83,28 @@
 (defun key-test (a &key b c)
   (list a b c))
 
-;; &key and &rest #1 OK 
-(defun key-rest-test (a &key b (name "Will"))
+;;; &key parameter can has a default value #1
+(defun key-dft-test (a &key b (name "Will"))
   (list a b name))
-;; &key and &rest #2 error! Can't compile the function !
+
+;;; and the default value can be a form #2
+(defun key-free-var ()
+  (let ((var 5))
+    (labels ((my-fun (num1 &key (num2 (+ var 5)))
+               (+ num1 num2)))
+      (list (my-fun 4) (incf var 3) (my-fun 5) (my-fun 40 :num2 2)))))
+
+;; &key and &rest #3
+;; error! Can't compile the function !
 ;; &key can not be followed by &rest !!
 (defun key-rest-test-err (a &key b (name "Will") &rest res)
   (list a b name res))
-;; &key and &optional test error! 
-;; &key can not be followed by &optional
+
+;; &key and &optional test #4
+;; error! &key can not be followed by &optional
 (defun key-optional-test-err (a &key (name "Will") &optional c d)
   (list a name c d))
+
 ;; but &optional can be followed by &key
 (defun key-optional-test (&optional c d &key (name "Will"))
   (list c d name))
@@ -114,7 +125,8 @@
 (defun append1 (lst obj)
   (append lst (list obj)))
 
-;; get a list of results of calling the function on the integers [0, n-1]
+;; get a list of results of calling the function on the 
+;; integers [0, n-1]
 (defun map-int (fn n)
   (let ((acc nil))
     (dotimes (i n)
@@ -147,6 +159,7 @@
               (setf wins obj
                     max score))))
         (values wins max))))
+
 
 ;;; Closures
 ;; combine obj according to the type
