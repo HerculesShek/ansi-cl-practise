@@ -167,7 +167,7 @@
   (typecase x
     (number #'+)
     (list #'append)
-    (t #'list)))z
+    (t #'list)))
 (defun combine (&rest args)
   (apply (combiner (car args))
          args))
@@ -212,7 +212,7 @@
                     #'(lambda (x) (- x 42))
                     #'+) 21 2 21))
 
-;; take some predicate functions and args should satisfy one of them
+;; #2 take some predicate functions and args should satisfy one of them
 (defun disjoin (fn &rest fns)
   (if (null fns)
       fn
@@ -220,7 +220,7 @@
         #'(lambda (&rest args)
             (or (apply fn args) (apply disj args)))))) ;; it's not effective
 
-;; take some predicates functions and args should satisfy all of them
+;; #3 take some predicates functions and args should satisfy all of them
 (defun conjoin (fn &rest fns)
   (if (null fns)
       fn
@@ -228,17 +228,17 @@
         #'(lambda (&rest args)
             (and (apply fn args) (apply conj args))))))
 
-;; take a function and some arguments to it and expect the rest args
+;; #4 take a function and some arguments to it and expect the rest args
 (defun curry (fn &rest args)
   #'(lambda (&rest args2)
       (apply fn (append args args2))))
 
-;; similar to curry 
+;; #5 similar to curry 
 (defun rcurry (fn &rest args)
   #'(lambda (&rest args2)
       (apply fn (append args2 args))))
 
-;; like the function of constantly in Common Lisp
+;; #6 like the function of constantly in Common Lisp
 ;; take a value and returns a function that just return the value 
 (defun always (x)
   #'(lambda (&rest args) ;; warnings for unused lexical variable args
