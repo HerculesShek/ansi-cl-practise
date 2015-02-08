@@ -196,15 +196,16 @@
 ;;; functions returning functions
 
 ;; #1 compose functions to one function
-;; (compose #'a #'b #'c) 
-;; == #'(lambda (&rest args) (a (b (apply #'c args))))
+;; (compose #'a #'b #'c) ==>
+;; #'(lambda (&rest args)
+;;     (funcall #'a (funcall #'b (apply #'c args))))
 (defun compose (&rest fns)
-  (destructuring-bind (fn1 . rest) (reverse fns) ;; from end
+  (destructuring-bind (fn1 . rest) (reverse fns) ; from end
     #'(lambda (&rest args)
         (reduce #'(lambda (res f)
-                    (funcall f res)) ;; here is funcall, the precedes functions only take 1 argument
+                    (funcall f res)) ; here is funcall, the preceding functions only take 1 argument but the last one
                 rest
-                :initial-value (apply fn1 args))))) ;; here is apply, so the last function to compose can take any number of arguments
+                :initial-value (apply fn1 args))))) ; here is apply, so the last function to compose can take any number of arguments
 
 ;; compose test 
 (defun compose-test () ; => 4
@@ -212,15 +213,17 @@
                     #'(lambda (x) (- x 42))
                     #'+) 21 2 21))
 
-;; #2 take some predicate functions and args should satisfy one of them
+;; #2 Take some predicate functions to generate one function
+;; to which the args passed should satisfy one of them
 (defun disjoin (fn &rest fns)
   (if (null fns)
       fn
       (let ((disj (apply #'disjoin fns)))
         #'(lambda (&rest args)
-            (or (apply fn args) (apply disj args)))))) ;; it's not effective
+            (or (apply fn args) (apply disj args)))))) ; it's not effective
 
-;; #3 take some predicates functions and args should satisfy all of them
+;; #3 take some predicates functions to generate one function
+;; to which the args passed should satisfy all of them
 (defun conjoin (fn &rest fns)
   (if (null fns)
       fn
@@ -228,7 +231,8 @@
         #'(lambda (&rest args)
             (and (apply fn args) (apply conj args))))))
 
-;; #4 take a function and some arguments to it and expect the rest args
+;; #4 take a function and some arguments to it and 
+;; expect the rest args
 (defun curry (fn &rest args)
   #'(lambda (&rest args2)
       (apply fn (append args args2))))
@@ -265,7 +269,8 @@
     (declare (special x))
     (foo-dec)))
 
-;; dynamic scope is usually used to give some global varialbe a new value temporarily
+;; dynamic scope is usually used to give some global varialbe 
+;; a new value temporarily
 (defun print-base-test ()
   (let ((*print-base* 16))
     (princ 32)))
@@ -284,14 +289,14 @@
       (+ (fib (- n 1))
          (fib (- n 2)))))
 
-;; fib iteration
+;; fib iteration -- more effective!
 (defun fib-do (n)
   (do ((i n (- i 1))
        (f1 1 (+ f1 f2))
        (f2 1 f1))
       ((<= i 1) f1)))
 
-;; exercises
+;;; Exercises
 ;; ex1 add :key and :start keywords parameter
 (defun tokens (str &key (test #'constituent) (start 0)) ;; 
   (let ((p1 (position-if test str :start start)))
