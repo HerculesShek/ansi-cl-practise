@@ -121,7 +121,7 @@
     (file-subst "baro" "baric" origin-filename output-filename)))
     
 
-;; Exercises
+;;; Exercises
 ;; ex1  returns a list of strings representing each line in the file.
 (defun file-to-lststr(file)
   (let ((acc nil))

@@ -298,7 +298,7 @@
 
 ;;; Exercises
 ;; ex1 add :key and :start keywords parameter
-(defun tokens (str &key (test #'constituent) (start 0)) ;; 
+(defun tokens (str &key (test #'constituent) (start 0))
   (let ((p1 (position-if test str :start start)))
     (if p1
         (let ((p2 (position-if #'(lambda (c)
@@ -310,10 +310,11 @@
   (and (graphic-char-p c)
        (not (char= c #\Space))))
 
-;; ex2 add :key :test :start :end keyword parameters 
-(defun bin-search (obj vec &key (key #'identity) (test #'equal) (start 0) end) ;; [start end]
+;;; ex2 add :key :test :start :end keyword parameters to bin-search
+;;; [start, end]
+(defun bin-search (obj vec &key (key #'identity) (test #'eql) (start 0) end) 
   (let* ((len (length vec))
-         (e (if (and end (integerp end)) end (- len 1)))) 
+         (e (if (and end (integerp end)) end (- len 1))))
     (and (not (zerop len))
          (<= start e)
          (finder obj vec start e key test))))
@@ -332,7 +333,8 @@
                   (finder obj vec start (- mid 1) key test)
                   (svref vec mid)))))))
 
-;; ex3 return the length of the parameters 
+;;; ex3 Define a function that takes any number of arguments and returns the 
+;;; number of arguments passed to it. 
 (defun n-params (&rest args)
   (length args))
 
@@ -354,31 +356,32 @@
          (let ((v (funcall fn elt)))
            (cond 
              ((< v1 v) (setf e2 e1 v2 v1 e1 elt v1 v))
-             ((< v2 v) (setf e2 elt v2 v))
-             (t nil))))
+             ((< v2 v) (setf e2 elt v2 v)))))
        (values e1 e2)))))
 
-;; ex5
-(defun remove-if-1 (fn lst)
+;; ex5 Define remove-if (no keywords) in terms of filter  
+(defun my-remove-if (fn lst)
   (filter-5 #'(lambda (x) (not (funcall fn x))) lst))
 ;; return the elements of lst that satisfy fn
 (defun filter-5 (fn lst)
   (let ((acc nil))
     (dolist (x lst)
       (let ((var (funcall fn x)))
-        (if var (push x acc)))) ;; modified
+        (if var (push x acc)))) ; modified
     (nreverse acc)))
 
 ;; ex6 return the greatest argument passed so far
-(let ((max 0))
+(let (max)
   (defun max-so-far (n)
     (and (numberp n)
-         (progn 
-           (setf max (if (< max n) n max))
-           max))))
-
-;; ex7
-(let ((pre))
+         (if (or (null max) (< max n))
+             (setf max n)))
+    max))
+ 
+;; ex7 Define a function that takes one argument, a number, and returns true 
+;; if it is greater than the argument passed to the function the last time it 
+;; was called. The function should return nil the first time it is called
+(let (pre)
   (defun greater-pre (n)
     (if (not (numberp n))
         (error "You should pass a number!")
@@ -391,8 +394,8 @@
               (setf pre n)
               nil)))))
 ;; ex7-prog1
-(let ((pre))
-  (defun pre-prog1 (n)
+(let (pre)
+  (defun greater-p-prog1 (n)
     (if (not (numberp n))
         (error "You should pass a number!")
         (prog1
@@ -400,6 +403,10 @@
           (setf pre n)))))
 
 ;; ex8 [0, 100]
+;;; Suppose expensive is a function of one argument, an integer between 
+;;; 0 and 100 inclusive, that returns the result of a time-consuming 
+;;; computation. Define a function frugal that returns the same answer, but 
+;;; only calls expensive when given an argument it has not seen before. 
 (defun expensive (n)
   (multiple-value-bind (res) (round (/ (* n (random 100)) 100))
     res))
