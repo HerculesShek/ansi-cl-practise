@@ -74,3 +74,5 @@
              (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个取出来 这个时候buf中一定是有数据的！并且避免了死循环！
              (setf pos 0))))
     (buf-flush buf out)))
+
+

@@ -86,7 +86,7 @@
          (buf (new-buf len)) ; the length of the buffer is decided by the length of the old string
          (from-buf nil)) ; storing a character from the buf
     (do ((c (read-char in nil :eof)
-            (or (setf from-buf (buf-next buf))  ;; setf 会返回最后一个参数求值结果
+            (or (setf from-buf (buf-next buf))  ; setf会返回最后一个参数求值结果
                 (read-char in nil :eof))))
         ((eql c :eof))
       (cond ((char= c (char old pos))      ; 5 从buf中取得的字符，并且是部分相等，这是buffer真正有用的地方
@@ -104,7 +104,7 @@
             (t                             ; 4 之前有相等的，但是现在这个字符不相等了
              (unless from-buf              ; 如果不是从buf中拿来的字符 需要加入到buf中，修改end
                (buf-insert c buf))         ; 这里就是为了保留火种！很巧妙，现在暂时不相等以后未必不相等，这个字符说不定和old的第一个字符相等
-             (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个字符取出来输出并从buffer中清理掉它 这个时候buf中一定是有数据的！并且避免了死循环！这句话是算法的一个核心，实际上，在buffer中如果之前匹配，但是碰上了一个不匹配的字符的时候，就必须去掉一个字符！如果有n个不匹配就去掉n个了，很好理解！
+             (princ (buf-pop buf) out)     ; 在这种情况下，需要将buf中的第一个字符取出来输出并从buffer中清理掉它 这个时候buf中一定是有数据的！并且避免了死循环！这行是算法的一个核心，实际上，在buffer中如果之前匹配，但是碰上了一个不匹配的字符的时候，就必须去掉一个字符！如果有n个不匹配就去掉n个了，很好理解。
              (setf pos 0)))) ; 既然碰到了不匹配的字符，就必须从old的开始索引0重新开始新一轮的匹配
     (buf-flush buf out)))
 ;; > (file-subst "baro" "baric" "a.txt" "b.txt")
@@ -119,12 +119,12 @@
         (princ "barbarous" origin)
         (fresh-line origin)))
     (file-subst "baro" "baric" origin-filename output-filename)))
-    
+
 
 ;;; Exercises
 ;; ex1  returns a list of strings representing each line in the file.
 (defun file-to-lststr(file)
-  (let ((acc nil))
+  (let (acc)
     (with-open-file (str file :direction :input)
       (do ((line (read-line str nil 'eof)
                  (read-line str nil 'eof)))
@@ -164,6 +164,6 @@
         (format t "~10,2,0,,' F" (aref farr i j)))
       (terpri))))
 
-;; ex5 wildcards "+" reference the source file ch7-ex5.lisp
-;; ex6 reference the source file ch7-ex6.lisp
+;; ex5 wildcards "+" reference the source file ch7-input-and-output-ex5.lisp
+;; ex6 reference the source file ch7-input-and-output-ex6.lisp
 
