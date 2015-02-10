@@ -25,7 +25,7 @@
   (setf name "will")
   (symbol-value 'name))
 
-;;; The code of random test generater, go to ch8-symbols-random-text.lisp
+;;; The code of random test generater is in ch8-symbols-random-text.lisp
 
 
 ;; Exercises

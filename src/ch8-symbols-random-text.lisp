@@ -4,9 +4,14 @@
 (defpackage "MY-APPLICATION"
   (:use "COMMON-LISP") ; the pacakge my-utilities is removed 
   (:nicknames "APP")
-  (:export "WIN" "LOSE" "DRAW"))
+  (:export "WIN" "LOSE" "DRAW" "NOISE" "*WORDS*" 
+           "MAXWORD" "READ-TEXT" "PUNC" "SEE"
+           "GENERATE-TEXT" "RANDOM-NEXT" "RTG-TEST"))
 ;; make my-application to be the current package 
-(in-package my-application)
+(in-package app)
+(defparameter win 1)
+(defparameter draw 0)
+(defparameter lose -1)
 
 ;; this function has no symbols belonging to my-application, 
 ;; it can be used everywhere, because the keywords are special symbols 
@@ -75,6 +80,7 @@
 ;; the poem is here 
 ;; http://www.gutenberg.org/cache/epub/26/pg26.txt
 ;; or https://www.dartmouth.edu/~milton/reading_room/pl/book_1/text.shtml
-(read-text "./text/lost.txt")
-(generate-text 15)
+(DEFUN RTG-TEST()
+  (read-text "./text/lost.txt")
+  (generate-text 15))
 
