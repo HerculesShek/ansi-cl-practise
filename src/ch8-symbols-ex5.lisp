@@ -2,10 +2,14 @@
 
 ;;; In my opinion, this exercise inspects the single directed linked list
 ;;; To verify whether or not a quote was produced by Henley
-;;; We're supposed that the origin article is stored in a text "some.txt"
-;;; first (read-txt "/path/to/some.txt")
+;;; We're supposed that the origin article wrote by Henley is stored 
+;;; in the text "some.txt"
+;;; first (read-txt "path/to/some.txt")
 ;;; second (henleyp-sentence "Wast present, and with mighty wings outspread" #'my-char)
 ;;; of course, you can replace string stream with file stream
+(defpackage "HENLEYP"
+  (:use "COMMON-LISP")
+  (:export "READ-TEXT"))
 (defparameter *words* (make-hash-table :size 10000))
 
 (defconstant maxword 100)
@@ -63,24 +67,24 @@
 
 ;; Get the first word or punctuation of sen from start 
 ;; and the index for getting the next word 
-(defun next-w (sen test start)
+(defun next-w (sen &optional (test #'my-char) (start 0))
   (let ((p1 (position-if test sen :start start)))
     (if p1
-        (let* ((p2 (position-if #'(lambda (x)
-                                    (not (funcall test x)))
-                                sen :start p1))
-               (prefix (position-if #'punc sen :start start :end p1)))
+        (let ((p2 (position-if #'(lambda (x)
+                                   (not (funcall test x)))
+                               sen :start (1+ p1)))
+              (prefix (position-if #'punc sen :start start :end p1)))
           (if prefix
               (values (char sen prefix) (1+ prefix))
               (values (subseq sen p1 p2) p2)))
         (values nil nil))))
 
 ;; test next-w
-(defun tokens (sen  &optional (test #'my-char) (start 0)) 
+(defun tokens (sen &optional (test #'my-char) (start 0)) 
   (multiple-value-bind (word index) (next-w sen test start)
     (when word
-      (format t "~A index is ~A   " word index)
-      (format t "length is ~A ~%" (if (characterp  word) 1 (length word)))
+      (format t "~A index is ~A  " word index)
+      (format t "length is ~A ~%" (if (characterp word) 1 (length word)))
       (if index
           (tokens sen test index)))))
 
@@ -90,10 +94,10 @@
       (char= c #\-)))
 
 
-
 ;;; Another solution
 ;;; The following code is from takafumi@shido.info, The code is too stiff, 
 ;;; so I have not read it, and it was just pasted here
+
 (defconstant maxword 100)
 
 ;; char -> symbol
@@ -156,7 +160,7 @@
               (format t "~2D-~2D:~A~%"
                       (truncate j)
                       (+ (truncate (incf j r)) (if (= i 4) 1 0))
-                      (nstar (if (< n* 1.0) (aref a i) (truncate (/  (aref a i) n*)))))))
+                      (nstar (if (< n* 1.0) (aref a i) (truncate (/ (aref a i) n*)))))))
           (if (< (aref a 3) (aref a 4))
               t
               nil)))))

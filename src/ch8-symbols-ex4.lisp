@@ -3,8 +3,9 @@
 ;; String Substitution -- an execllent example!
 (defpackage "RING"
   (:use "COMMON-LISP")
-  (:export "BUF" "BREF" "NEW-BUF" "BUF-INSERT" "BUF-POP" "BUF-NEXT" "BUF-RESET" "BUF-CLEAR" "BUF-FLUSH"))
-
+  (:export "BUF" "BREF" "NEW-BUF" "BUF-INSERT" 
+           "BUF-POP" "BUF-NEXT" "BUF-RESET" 
+           "BUF-CLEAR" "BUF-FLUSH"))
 (in-package ring)
 
 (defstruct buf
@@ -48,7 +49,8 @@
     (princ (bref b i) str)))
 
 (defpackage "FILE"
-  (:use "COMMON-LISP" "RING"))
+  (:use "COMMON-LISP" "RING")
+  (:export "FILE-SUBST" "FILE-SUBST-TEST"))
 (in-package file)
 
 (defun file-subst (old new file1 file2)
@@ -63,7 +65,7 @@
          (buf (new-buf len))
          (from-buf nil))
     (do ((c (read-char in nil :eof)
-            (or (setf from-buf (buf-next buf))  ;; setf 会返回最后一个参数求值结果
+            (or (setf from-buf (buf-next buf))  ; setf返回最后一个参数求值结果
                 (read-char in nil :eof))))
         ((eql c :eof))
       (cond ((char= c (char old pos))
@@ -85,4 +87,5 @@
              (setf pos 0))))
     (buf-flush buf out)))
 
-(file-subst "baro" "baric" "a.txt" "b.txt")
+(defun file-subst-test ()
+  (file-subst "baro" "baric" "a.txt" "b.txt"))

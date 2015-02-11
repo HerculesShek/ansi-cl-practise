@@ -30,10 +30,15 @@
 
 ;; Exercises
 ;; ex1 Yes if they're in different packages
+
 ;; ex2 "FOO" 3 bytes 
 ;; 'FOO name package variable function attribute-list 20+ bytes
-;; ex3 a serious question, if defpackage with symbol, the symbol is interned in the package implicitly
+
+;; ex3 a serious question, if defpackage with symbol, the symbol is 
+;; interned in the package implicitly
+
 ;; ex4 reference to ch8-symbols-ex4.lisp
+
 ;; ex5 read-text a Henley's poem to generate the *words*, then judge a string from the first words as prev found from *words* 
 ;; the file ch8-symbols-ex5.lisp contains the solution
 
