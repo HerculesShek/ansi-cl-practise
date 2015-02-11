@@ -10,6 +10,7 @@
 (defpackage "HENLEYP"
   (:use "COMMON-LISP")
   (:export "READ-TEXT"))
+(in-package henleyp)
 (defparameter *words* (make-hash-table :size 10000))
 
 (defconstant maxword 100)
