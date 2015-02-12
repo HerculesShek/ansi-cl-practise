@@ -20,11 +20,16 @@
 (in-package ray-tracing)
 
 ;;; Math utilities. 
+;; returns the square of its argument.  
 (defun sq (x) (* x x))
 
+;; returns the magnitude of a vector given its x, y, and z components. 
+;; This function is used in unit-vector and distance 
 (defun mag (x y z)
   (sqrt (+ (sq x) (sq y) (sq z))))
 
+;; returns three values representing the components of a unit vector--单位向量
+;; with the same direction
 (defun unit-vector (x y z)
   (let ((d (mag x y z)))
     (values (/ x d) (/ y d) (/ z d))))
@@ -32,11 +37,13 @@
 (defstruct (point (:conc-name nil))
   x y z)
 
+;; returns the distance between two points in 3-space.
 (defun distance (p1 p2)
   (mag (- (x p1) (x p2))
        (- (y p1) (y p2))
        (- (z p1) (z p2))))
 
+;; 一元二次方程求解取最小的解
 (defun minroot (a b c)
   (if (zerop a)
       (/ (- c) b)
@@ -47,6 +54,10 @@
                  (/ (- (- b) discrt) (* 2 a))))))))
 
 ;;; ray tracing 
+;; The surface structure will be used to represent the objects in the simulated 
+;; world. More precisely, it will be included in the structures defined to 
+;; represent specific kinds of objects, like spheres. The surface structure itself 
+;; contains only a single field: a color ranging from 0 (black) to 1 (white).
 (defstruct surface color)
 
 (defparameter *world* nil)
@@ -94,10 +105,9 @@
   radius center)
 
 (defun defsphere (x y z r c)
-  (let ((s (make-sphere
-             :radius r
-             :center (make-point :x x :y y :z z)
-             :color  c)))
+  (let ((s (make-sphere :radius r
+                        :center (make-point :x x :y y :z z)
+                        :color c)))
     (push s *world*)
     s))
 
@@ -116,9 +126,9 @@
                         (sq (- (z pt) (z c)))
                         (- (sq (sphere-radius s)))))))
     (if n
-        (make-point :x  (+ (x pt) (* n xr))
-                    :y  (+ (y pt) (* n yr))
-                    :z  (+ (z pt) (* n zr))))))
+        (make-point :x (+ (x pt) (* n xr))
+                    :y (+ (y pt) (* n yr))
+                    :z (+ (z pt) (* n zr))))))
 
 (defun normal (s pt)
   (funcall (typecase s (sphere #'sphere-normal))
@@ -139,7 +149,7 @@
   (do ((x -2 (1+ x)))
       ((> x 2))
     (do ((z 2 (1+ z)))
-        ((> z 7))
+        ((> z 8))
       (defsphere (* x 200) 300 (* z -400) 40 .75)))
   (tracer (make-pathname :name "spheres.pgm") res))
 
