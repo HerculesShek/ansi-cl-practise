@@ -153,3 +153,39 @@
       (defsphere (* x 200) 300 (* z -400) 40 .75)))
   (tracer (make-pathname :name "spheres.pgm") res))
 
+
+;;; Exercises 
+(defpackage "CH9-EX"
+  (:use "COMMON-LISP")
+  (:exoprt ""))
+(in-package ch9-ex)
+
+;; ex1 takes a list of reals and returns true iff they are 
+;; in nondecreasing order.
+(defun non-decreasingp (lst)
+  (and (every #'realp lst)
+       (apply #'<= lst)))
+
+;; ex2  takes an integer number of cents and returns four 
+;; values showing how to make that number out of 25-, 10-, 5- and 
+;; 1-cent pieces, using the smallest total number of coins. 
+(defun coins (n &optional (model '(25 10 5)) res)
+  (if model
+      (multiple-value-bind (n r) (floor n (car model))
+        (coins r (cdr model) (cons n res)))
+      (nreverse (cons n res))))
+
+
+;; ex3 
+(defun comp-res (&optional (y 10))
+  (if (> y 0)
+    (let ((n (+ (random 3) 4)))
+      (format t "WIGGLIES : ~A, " n)
+      (format t "WOBBLIES : ~A~%" (- 10 n))
+      (comp-res (1- y)))))
+  
+;; ex4 
+
+
+
+
