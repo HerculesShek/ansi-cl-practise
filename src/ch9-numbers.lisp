@@ -185,6 +185,8 @@
       (comp-res (1- y)))))
   
 ;; ex4 
+(defun segment-intersect (x1 y1 x2 y2 x3 y3 x4 y4)
+  
 
 
 
