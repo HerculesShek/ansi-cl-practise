@@ -270,21 +270,38 @@
 
 ;; test 
 (defun approx-test ()
-   (approx #'(lambda (x) x) -2.4 1 0.05))
+  (approx #'(lambda (x) x) -2.4 1 0.05))
 
 
-;; ex6 
-(defun horner (x &rest parms)
-  (labels ((rec (parms acc)
-             (if parms
-                 (rec (cdr parms) (+ (* acc x) (car parms)))
-                 acc)))
-    (rec parms 0)))
+;; ex6 Horner's  method is a trick for evaluating polynomials efficiently
+(defun horner (x &optional parms (res 0))
+  (if parms
+      (horner x (cdr parms) (+ (* res x) (car parms)))
+      res))
 
-;; ex7 
+;; ex7 get the number of bits representing fixnums
 (defun fixnums-bits()
   (log (1+ most-positive-fixnum) 2))
 
-;; ex8
+;; ex8 get all types of float 
 (defun float-types ()
-  (
+  (format t "most-negative-short-float ~S~%" most-negative-short-float)
+  (format t "least-negative-short-float ~S~%" least-negative-short-float)
+  (format t "most-positive-short-float ~S~%" most-positive-short-float)
+  (format t "least-positive-short-float ~S~%" least-positive-short-float)
+  
+  (format t "most-negative-single-float ~S~%" most-negative-single-float)
+  (format t "least-negative-single-float ~S~%" least-negative-single-float)
+  (format t "most-positive-single-float ~S~%" most-positive-single-float)
+  (format t "least-positive-single-float ~S~%" least-positive-single-float)
+  
+  (format t "most-negative-double-float ~S~%" most-negative-double-float)
+  (format t "least-negative-double-float ~S~%" least-negative-double-float)
+  (format t "most-positive-double-float ~S~%" most-positive-double-float)
+  (format t "least-positive-double-float ~S~%" least-positive-double-float)
+  
+  (format t "most-negative-long-float ~S~%" most-negative-long-float)
+  (format t "least-negative-long-float ~S~%" least-negative-long-float)
+  (format t "most-positive-long-float ~S~%" most-positive-long-float)
+  (format t "least-positive-long-float ~S~%" least-positive-long-float))
+  
