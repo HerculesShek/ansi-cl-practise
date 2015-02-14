@@ -179,15 +179,66 @@
 ;; ex3 
 (defun comp-res (&optional (y 10))
   (if (> y 0)
-    (let ((n (+ (random 3) 4)))
-      (format t "WIGGLIES : ~A, " n)
-      (format t "WOBBLIES : ~A~%" (- 10 n))
-      (comp-res (1- y)))))
+      (let ((n (+ (random 3) 4)))
+        (format t "WIGGLIES : ~A, " n)
+        (format t "WOBBLIES : ~A~%" (- 10 n))
+        (comp-res (1- y)))))
   
-;; ex4 
+;; ex4 给出4个点的坐标表示2个线段，判断是否相交，如果相交，返回相交的点
+;; p(x1, y1) q(x3, y3)
+;; 这个题目十分有意思！！算法参考 http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+;; 但是他的回答的第一条是不合理的，我会针对此问题写一篇博客
 (defun segment-intersect (x1 y1 x2 y2 x3 y3 x4 y4)
-  
+  (labels ((D2-cross-product (px1 py1 px2 py2)
+             (- (* px1 py2) (* py1 px2)))
+           (D2-vector-product (px1 py1 px2 py2)
+             (+ (* px1 px2) (* py1 py2)))
+           (same-direction? (px1 py1 px2 py2)
+             (if (zerop px1)
+                 (if (zerop py1)
+                     (error "zero vector!")
+                     (eql (signum py1) (signum py2)))
+                 (= (signum px1) (signum px2)))))
+    (if (or (and (= x1 x2) (= y1 y2))
+            (and (= x3 x4) (= y3 y4)))
+        (error "not 2 segments!!!"))
+    (let* ((r-x (- x2 x1))
+           (r-y (- y2 y1))
+           (s-x (- x4 x3))
+           (s-y (- y4 y3))
+           (pq-x (- x3 x1))
+           (pq-y (- y3 y1))
+           (qp-x (- pq-x))
+           (qp-y (- pq-y))
+           (rXs (D2-cross-product r-x r-y s-x s-y))
+           (pqXr (D2-cross-product pq-x pq-y r-x r-y)))
+      (if (zerop rXs) ; 方向相同或者相反
+          (if (zerop pqXr) ; 共线
+              (if (same-direction? r-x r-y s-x s-y) ; 共线并且同向
+                  (let ((pq-dot-r (D2-vector-product pq-x pq-y r-x r-y))
+                        (r-dot-r (D2-vector-product r-x r-y r-x r-y)))
+                    (if (<= 0 pq-dot-r r-dot-r)
+                        (cond 
+                          ((= 0 pq-dot-r) ; 两个线段的起点一样
+                           (if (> (D2-vector-product r-x r-y r-x r-y) 
+                                  (D2-vector-product s-x s-y s-x s-y))
+                               (values "overlap" x3 y3 x4 y4)
+                               (values "overlap" x1 y1 x2 y2)))
+                           ((= pq-dot-r r-dot-r) (values "overlap at one point" x2 y2 nil nil))
+                           (t (segment-intersect x3 y3 x2 y2 x3 y3 x4 y4)))
+                        (let ((qp-dot-s (D2-vector-product qp-x qp-y s-x s-y))
+                              (s-dot-s (D2-vector-product s-x s-y s-x s-y)))
+                          (if (<= qp-dot-s s-dot-s)
+                              (segment-intersect x3 y3 x4 y4 x1 y1 x2 y2)
+                              (values "collinear but disjoint" nil nil nil nil)))))
+                  (segment-intersect x1 y1 x2 y2 x4 y4 x3 y3)) ; 共线不同向
+              (values "parallel and non-intersecting" nil nil nil nil)) ; 平行 但是不共线
+          (let ((scalar-t (/ (D2-cross-product pq-x pq-y s-x s-y) rXs)) ; 两个线段所在的直线是相交的
+                (scalar-u (/ (D2-cross-product pq-x pq-y r-x r-y) rXs)))
+            (if (and (<= 0 scalar-t 1) (<= 0 scalar-u 1))
+                (values "meet" (+ x1 (* scalar-t r-x)) (+ y1 (* scalar-t r-y)) nil nil)
+                (values "not parallel but do not intersect" nil nil nil nil)))))))
 
-
-
+               
+              
 
