@@ -224,8 +224,8 @@
                                   (D2-vector-product s-x s-y s-x s-y))
                                (values "overlap" x3 y3 x4 y4)
                                (values "overlap" x1 y1 x2 y2)))
-                           ((= pq-dot-r r-dot-r) (values "overlap at one point" x2 y2 nil nil))
-                           (t (segment-intersect x3 y3 x2 y2 x3 y3 x4 y4)))
+                          ((= pq-dot-r r-dot-r) (values "overlap at one point" x2 y2 nil nil))
+                          (t (segment-intersect x3 y3 x2 y2 x3 y3 x4 y4)))
                         (let ((qp-dot-s (D2-vector-product qp-x qp-y s-x s-y))
                               (s-dot-s (D2-vector-product s-x s-y s-x s-y)))
                           (if (<= qp-dot-s s-dot-s)
@@ -239,6 +239,52 @@
                 (values "meet" (+ x1 (* scalar-t r-x)) (+ y1 (* scalar-t r-y)) nil nil)
                 (values "not parallel but do not intersect" nil nil nil nil)))))))
 
-               
-              
 
+;; ex5 Suppose f is a function of one (real) argument, and that min and 
+;; max are nonzero reals with different signs such that f has a 
+;; root (returns zero) for one argument i such that min < i < max.  
+;; Define a function that takes four arguments, f, min, max, and epsilon,  
+;; and returns an approximation of i accurate to within plus or minus  
+;; epsilon. 
+;; 假使函数f接受一个实数，min和max是非零的不同符号的2个实数：min<0<max，有个
+;; 实数i属于(min, max)--开区间，使得f(i)=0，也就是i是函数f的根。
+;; 定义一个函数，接受4个参数：f, min, max, epsilon，返回i的近似值，误差在
+;; epsilon之内
+
+;;; 其实这个问题的原述不合理，应该是f(minx)<0<f(max)或者f(max)<0<f(min)，并
+;;; 且，min和max之间i不一定是函数f的唯一的根
+(defun approx (f min max epsilon)
+  (let* ((range (- max min))
+         (mid (+ min (/ range 2))))
+    (if (< 0 (* (funcall f min) (funcall f max)))
+        (error "wrong f or wrong range (min, max) !!!"))
+    (if (< range epsilon)
+        min
+        (let* ((min-val (funcall f min))
+               (mid-val (funcall f mid))
+               (flag (* min-val mid-val)))
+          (cond
+            ((= mid-val 0) mid)
+            ((< flag 0) (approx f min mid epsilon))
+            (t (approx f mid max epsilon)))))))
+
+;; test 
+(defun approx-test ()
+   (approx #'(lambda (x) x) -2.4 1 0.05))
+
+
+;; ex6 
+(defun horner (x &rest parms)
+  (labels ((rec (parms acc)
+             (if parms
+                 (rec (cdr parms) (+ (* acc x) (car parms)))
+                 acc)))
+    (rec parms 0)))
+
+;; ex7 
+(defun fixnums-bits()
+  (log (1+ most-positive-fixnum) 2))
+
+;; ex8
+(defun float-types ()
+  (
