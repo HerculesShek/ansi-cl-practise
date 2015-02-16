@@ -47,3 +47,37 @@
     (if (>= (- j l) 1) (quicksort vec l j))
     (if (>= (- r i) 1) (quicksort vec i r)))
   vec)
+
+
+;; wrong macro
+(defmacro ntimes (n &rest body)
+  `(do ((x 0 (+ x 1)))
+       ((>= x ,n))
+     ,@body))
+
+;; improved macro
+(defmacro ntimes (n &rest body)
+  (let ((g (gensym)))
+    `(do ((,g 0 (+ ,g 1)))
+         ((>= ,g ,n))
+       ,@body)))
+
+;; final macro
+(defmacro ntimes (n &rest body)
+  (let ((g (gensym))
+        (h (gensym)))
+    `(let ((,h ,n))
+       (do ((,g 0 (+ ,g 1)))
+           ((>= ,g ,h))
+         ,@body))))
+
+;; my car
+(defmacro cah (lst)
+  `(car ,lst))
+
+;; wrong incf 
+(defmacro w-incf (x &optional (y 1))
+  `(setf ,x (+ ,x ,y)))
+
+;; correct incf
+(define-modify-macro my-incf (&optional (y 1)) +)
