@@ -4,4 +4,4 @@
 .#*
 *.txt
 /src/text
-*.directory
+/src/.directory
