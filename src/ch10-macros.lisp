@@ -81,3 +81,66 @@
 
 ;; correct incf
 (define-modify-macro my-incf (&optional (y 1)) +)
+
+;; push at the end 
+(define-modify-macro my-push (val)
+  (lambda (lst val) (append lst (list val))))
+
+;;; Macro Utilities
+;; for macro 
+(defmacro for (var start stop &body body)
+  (let ((gstop (gensym)))
+    `(do ((,var ,start (1+ ,var))
+          (,gstop ,stop))
+         ((> ,var ,gstop))
+       ,@body)))
+;; for-test
+(defun for-test ()
+  (for x 1 8
+    (princ x)))
+
+;; in macro 
+(defmacro in (obj &rest choices)
+  (let ((insym (gensym)))
+    `(let ((,insym ,obj))
+       (or ,@(mapcar #'(lambda (c) `(eql ,insym ,c))
+                     choices)))))
+;; in test 
+(defun in-test ()
+  (in (+ 20 4) 1 2 3 24))
+
+;; random-choice macro, randomly chooses an argument to evaluate.
+(defmacro random-choice (&rest exprs)
+  `(case (random ,(length exprs))
+     ,@(let ((key -1))
+            (mapcar #'(lambda (expr)
+                        `(,(incf key) ,expr))
+                    exprs))))
+;; random-choice test 
+(defun random-choice-test ()
+  (setf (symbol-function 'funa) #'(lambda () 1))
+  (setf (symbol-function 'funb) #'(lambda () 2))
+  (for i 1 5
+    (princ (random-choice (funa) (funb)))))
+
+;; avg macro 
+(defmacro avg (&rest args)
+  `(/ (+ ,@args) ,(length args)))
+;; avg test 
+(defun avg-test ()
+  (avg 1 2 33 5))
+
+;; avoid declare a lot of gensyms 
+(defmacro with-gensyms (syms &body body)
+  `(let ,(mapcar #'(lambda (s)
+                     `(,s (gensym)))
+                 syms)
+     ,@body))
+  
+;; intentional variable capture.
+(defmacro aif (test then &optional else)
+  `(let ((it ,test))
+     (if it ,then ,else)))
+(defun aif-test ()
+  (aif 11 2 3))
+
