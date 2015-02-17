@@ -32,6 +32,13 @@
       (princ x)
       (incf x))))
 
+;; do macro test 
+(defun do-test ()
+  (let ((x 11))
+    (do ((i 0 (1+ i)))
+        ((= i (decf x)))
+      (format t "x is ~A i is ~A~&" x i))))
+
 ;; quick sort 
 (defun quicksort (vec l r)
   (let ((i l)
@@ -47,7 +54,6 @@
     (if (>= (- j l) 1) (quicksort vec l j))
     (if (>= (- r i) 1) (quicksort vec i r)))
   vec)
-
 
 ;; wrong macro
 (defmacro ntimes (n &rest body)
