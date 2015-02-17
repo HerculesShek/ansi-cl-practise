@@ -88,7 +88,7 @@
 ;; correct incf
 (define-modify-macro my-incf (&optional (y 1)) +)
 
-;; push at the end 
+;; push at the end of a list 
 (define-modify-macro my-push (val)
   (lambda (lst val) (append lst (list val))))
 
@@ -105,12 +105,17 @@
   (for x 1 8
     (princ x)))
 
-;; in macro 
+;; in macro, returns true if its first argument is eql 
+;; to any of the other arguments. 
 (defmacro in (obj &rest choices)
   (let ((insym (gensym)))
     `(let ((,insym ,obj))
        (or ,@(mapcar #'(lambda (c) `(eql ,insym ,c))
                      choices)))))
+;; if obj is a form, it will be multiple evaluated!
+(defmacro in (obj &rest choices)
+  `(or ,@(mapcar #'(lambda (c) `(eql ,obj ,c))
+                 choices)))
 ;; in test 
 (defun in-test ()
   (in (+ 20 4) 1 2 3 24))
@@ -142,7 +147,15 @@
                      `(,s (gensym)))
                  syms)
      ,@body))
-  
+;; with-gensyms test
+(defmacro ntimes-gen (n &rest body)
+  (with-gensyms (h g)
+    `(let ((,h ,n))
+       (do ((,g 0 (1+ ,g)))
+           ((> ,g ,h))
+         ,@body))))
+
+
 ;; intentional variable capture.
 (defmacro aif (test then &optional else)
   `(let ((it ,test))
