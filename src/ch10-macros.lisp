@@ -141,7 +141,7 @@
 (defun avg-test ()
   (avg 1 2 33 5))
 
-;; avoid declare a lot of gensyms 
+;; avoid declaring a lot of gensyms 
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s)
                      `(,s (gensym)))
@@ -155,11 +155,101 @@
            ((> ,g ,h))
          ,@body))))
 
-
-;; intentional variable capture.
+;; intentional variable capture. 
+;; the next-method-p and call-next-method also use this
+;; technique
 (defmacro aif (test then &optional else)
   `(let ((it ,test))
      (if it ,then ,else)))
+;; aif test 
 (defun aif-test ()
   (aif 11 2 3))
+
+
+;;; Exercises
+;; ex1  
+;; a) `(,z ,x z)
+;; b) `(x ,y ,@z)
+;; c) `((,@z ,x) z)
+
+;; ex2 Define if in terms of cond. 
+(defmacro cif (test then &optional else)
+  `(cond (,test ,then)
+         (t ,else)))
+
+;; ex3 Define a macro that takes a number n followed 
+;; by one or more expressions, and returns the value 
+;; of the nth expression
+(defmacro n-expr (n &rest exprs)
+  (if (and (integerp n) (<= n (length exprs)))
+      (nth (1- n) exprs)
+      `(case ,n
+         ,@(let ((key 0))
+                (mapcar #'(lambda (expr)
+                            `(,(incf key) ,expr))
+                        exprs)))))
+
+;; ex4 Define ntimes to expand into a (local) recursive 
+;; function instead of a do. 
+(defmacro ntimes (n &rest body)
+  (with-gensyms (h fun)
+    `(let ((,h ,n))
+       (labels ((,fun (i)
+                  (when (< i ,h)
+                    ,@body
+                    (,fun (1+ i)))))
+         (,fun 0)))))
+
+;; ex5 Define a macro n-of that takes a number n and an 
+;; expression, and returns a list of n successive values
+;; returned by the expression
+;; ex5-V1 n-of do 
+(defmacro n-of (n start)
+  (with-gensyms (begin stop i res)
+    `(let ((,begin ,start) (,stop ,n))
+       (and (integerp ,stop) 
+            (> ,stop 0)
+            (do ((,i 0 (1+ ,i))
+                 (,res nil (cons (+ ,i ,begin) ,res)))
+                ((= ,stop ,i) (nreverse ,res)))))))
+;; ex5-V2 n-of recursive 
+(defmacro n-of (n start)
+  (with-gensyms (begin stop f)
+    `(let ((,begin ,start) (,stop ,n))
+       (and (integerp ,stop) 
+            (> ,stop 0)
+            (labels ((,f (n res)
+                       (if (zerop n)
+                           (nreverse res)
+                           (,f (1- n) (cons (1+ (car res)) res)))))
+              (,f (1- ,stop) (list ,begin)))))))
+
+;; ex6 nice solution
+(defmacro retain (params &rest body)
+  `((lambda ,params ,@body)
+    ,@params))
+(defun retain-test ()
+  (let ((a 1) (b 2) (c 3) (d 4))
+    (retain (a b c)
+            (setf a 10 b 20 c 30 d 40)
+            (format t "a=~A b=~A c=~A d=~A~%" a b c d))
+    (format t "a=~A b=~A c=~A d=~A" a b c d)))
+
+;; ex7 wrong push test 
+(defmacro push-w (obj lst)
+  `(setf ,lst (cons ,obj ,lst)))
+(defun push-w-test () ; => #((1) (42 3) (3))
+  (let ((i 0)
+        (arr #((1) (2) (3))))
+    (push-w 42 (aref arr (incf i)))
+    arr))
+(defun push-test () ; => #((1) (42 2) (3))
+  (let ((i 0)
+        (arr #((1) (2) (3))))
+    (push 42 (aref arr (incf i)))
+    arr))
+
+;; ex8 double its argument
+(define-modify-macro double ()
+    (lambda (val) (* val 2)))
 
