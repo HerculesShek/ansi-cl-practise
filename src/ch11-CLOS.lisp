@@ -113,11 +113,67 @@
   (format nil "~A ice-cream with ~A."
           (name ic)
           x))
-(defmethod combine ((x number) (y number)) 
-(+ x y)) 
+(defmethod combine ((x number) (y number))
+  (+ x y))
 (defmethod combine ((x (eql 'powder)) (y (eql 'spark)))
   'boom)
 
 ;;; Generic Fuctions Test
-(defmethod combine ((a cast-statue) b)
-  (format nil "~A and ~A" (name a) b))
+(defmethod combine ((a cast-statue) (b t))
+  1)
+(defmethod combone ((a statue) (b casting))
+  2)
+
+;;; Auxiliary Methods 
+(defclass speaker () ())
+
+(defmethod speak ((s speaker) string)
+  (format t "~A" string))
+
+(defclass intellectual (speaker) ())
+
+(defmethod speak :before ((i intellectual) string)
+  (princ "Perhaps "))
+
+(defmethod speak :after ((i intellectual) string)
+  (princ " in some sense"))
+
+(defmethod speak :before ((s speaker) string)
+  (princ "I think "))
+
+;;; 奉承者
+(defclass courtier (speaker) ())
+
+(defmethod speak :around ((c courtier) string)
+  (format t "Does the King believe that ~A?" string)
+  (if (eql (read) 'yes)
+      (if (next-method-p) (call-next-method))
+      (format t "Indeed, it is a preposterous idea. ~%"))
+  'bow)
+
+
+;;; Method Combination
+(defgeneric price (x)
+  (:method-combination +))
+
+(defclass jacket () ())
+(defclass trousers () ())
+(defclass suit (jacket trousers) ())
+
+(defmethod price + ((jk jacket)) 350)
+(defmethod price + ((tr trousers)) 200)
+
+;;; Encapsulation
+(defpackage "CTR"
+  (:use "COMMON-LISP")
+  (:export "COUNTER" "INCREMENT" "CLEAR"))
+(in-package ctr)
+
+(defclass counter () ((state :initform 0)))
+
+(defmethod increment ((c counter))
+  (incf (slot-value c 'state)))
+
+(defmethod clear ((c counter))
+  (setf (slot-value c 'state) 0))
+
