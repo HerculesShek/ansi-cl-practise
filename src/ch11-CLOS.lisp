@@ -141,6 +141,13 @@
 (defmethod speak :before ((s speaker) string)
   (princ "I think "))
 
+(defmethod speak :after ((s speaker) string)
+  (princ " indeed"))
+
+(defun Auxiliary-test ()
+  (speak (make-instance 'intellectual)
+         "I'm hungry "))
+
 ;;; 奉承者
 (defclass courtier (speaker) ())
 
@@ -156,12 +163,16 @@
 (defgeneric price (x)
   (:method-combination +))
 
-(defclass jacket () ())
-(defclass trousers () ())
-(defclass suit (jacket trousers) ())
+(defclass jacket () ()) ; 夹克
+(defclass trousers () ()) ; 裤子
+(defclass suit (jacket trousers) ()) ; 套装
 
 (defmethod price + ((jk jacket)) 350)
 (defmethod price + ((tr trousers)) 200)
+(defmethod price + ((s suit)) 500)
+
+(defun m-c-test ()
+  (price (make-instance 'suit)))
 
 ;;; Encapsulation
 (defpackage "CTR"
