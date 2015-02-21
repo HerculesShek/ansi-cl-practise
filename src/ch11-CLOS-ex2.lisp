@@ -62,7 +62,7 @@
         (do ((x -50 (+ x inc)))
             ((< (- 50 x) inc))
           (print (color-at x y) p))))))
-
+;;; 加入下面的这个代码是为了解决 make-load-form问题 
 (defmethod make-load-form ((p point) &optional env)
   (declare (ignore env))
   (make-load-form-saving-slots p))
