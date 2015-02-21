@@ -188,3 +188,24 @@
 (defmethod clear ((c counter))
   (setf (slot-value c 'state) 0))
 
+
+;;; Exerceses
+;; ex1 
+(defclass rectangle ()
+  ((height :accessor rect-height :initform 0 :initarg :height) 
+   (width :accessor rect-width :initform 0 :initarg :width)))
+
+(defclass circle ()
+  ((radius :accessor circle-radius :initform 0 :initarg :radius)))
+
+(defmethod area ((x rectangle))
+  (* (rect-height x) (rect-width x)))
+
+(defmethod area ((x circle))
+  (* pi (expt (circle-radius x) 2)))
+
+;; ex2 ch11-CLOS-ex2.lisp
+
+;; ex3 
+
+
