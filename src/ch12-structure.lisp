@@ -61,6 +61,11 @@
   elt
   (l nil)
   (r nil))
+
+;;; 为了递归更好的工作，定义一个根
+(defun make-a-bst ()
+  (make-node))
+
 (defun root-insert! (obj v-root <)
   (bst-insert! obj (node-elt v-root) < v-root :e))
 ;; insert 非平衡的BST插入
@@ -147,7 +152,7 @@
 
 ;; delete obj from bst
 (defun bst-del (obj v-root <)
-  (bst-delete obj (node-elt v-root) v-root :e))
+  (bst-delete obj (node-elt v-root) < v-root :e))
 ;;; 从bst中删除一个元素
 ;;; par是bst的父节点，dir有3个值 l左孩子，r有孩子，e说明par是虚拟根节点
 (defun bst-delete (obj bst < par dir)
@@ -194,9 +199,7 @@
     (funcall fn (node-elt bst))
     (bst-traverse fn (node-r bst))))
 
-;;; 为了递归更好的工作，定义一个根
-(defun make-a-bst ()
-  (make-node))
+
 
 ;; BST的测试函数
 (defun bst-test()
@@ -215,7 +218,7 @@
       (format t "~%before remove:~%print:~%")
       (print-root nums)
       (format t "bst-traverse: ")
-      (root-traverse #'(lambda (x) (format t "~A, " x)) nums)
+      (root-traverse #'(lambda (x) (format t "~A," x)) nums)
       (bst-del 2 nums #'<)
       (format t "~%after remove 2:~%print:~%")
       (print-root nums)
@@ -223,3 +226,35 @@
       (root-traverse #'princ nums))))
 
 
+;;; Doubly-Linked Lists, just for fun, not usefull
+(defstruct (dl (:print-function print-dl)
+               (:predicate dlp))
+  prev data next)
+(defun print-dl (dl stream depth)
+  (declare (ignore depth))
+  (format stream "#<DL ~A>" (dl->list dl)))
+;; dl to list
+(defun dl->list (lst)
+  (if (dlp lst)
+      (cons (dl-data lst) (dl->list (dl-next lst)))
+      lst))
+
+(defun dl-insert (x lst)
+  (let ((elt (make-dl :data x :next lst)))
+    (when (dlp lst)
+      (if (dl-prev lst)
+          (setf (dl-next (dl-prev lst)) elt
+                (dl-prev elt) (dl-prev lst)))
+      (setf (dl-prev lst) elt))
+    elt))
+
+(defun dl-list (&rest args)
+  (reduce #'dl-insert args
+          :from-end t :initial-value nil))
+
+(defun dl-remove (lst)
+  (if (dl-prev lst)
+      (setf (dl-next (dl-prev lst)) (dl-next lst)))
+  (if (dl-next lst)
+      (setf (dl-prev (dl-next lst)) (dl-prev lst)))
+  (dl-next lst))
