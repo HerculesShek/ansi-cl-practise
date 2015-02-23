@@ -28,9 +28,10 @@
       (setf (cdr (cdr q)) (list obj)
             (cdr q) (cdr (cdr q))))
   (car q))
-;; get and remove the front element 
+;; get and remove the front element
 (defun dequeue (q)
-  (pop (car q)))      
+  (pop (car q)))
+
 
 ;; our mapcan
 (defun our-mapcan (fn &rest lsts)
@@ -258,3 +259,89 @@
   (if (dl-next lst)
       (setf (dl-prev (dl-next lst)) (dl-prev lst)))
   (dl-next lst))
+
+;;; make a list to a cdr-circular
+(defun circular (lst)
+  (setf (cdr (last lst)) lst))
+
+;; test whether something is an arithmetic operator
+(defun arith-op (x)
+  (member x '(+ - * /)))
+;; safe one 
+(defun arith-op (x)
+  (member x (list '+ '- '* '/)))
+;; safe and effective one
+(defun arith-op (x)
+  (find x '(+ - * /)))
+
+
+;;; Exercises
+;; ex1-1 
+(let ((ele '(a)))
+  (list ele ele ele))
+;; ex1-2
+(list (list 'a) (list 'a) (list 'a))
+;; ex2-3 
+(let ((ele '(a)))
+  (list (copy-list ele) ele ele))
+
+;; ex2 ../images/ch12-ex2.png
+
+;; ex3 
+(defun copy-queue (q)
+  (let ((qu (make-queue)))
+    (setf (car qu) (copy-list (car q))
+          (cdr qu) (last (car qu)))
+    qu))
+
+;; ex4 same as enqueue
+
+;; ex5 move the first element eql obj to the front of q
+(defun move-front (obj q)
+  (if (or (eql (car q) (cdr q))
+          (eql (caar q) obj))
+      (return-from move-front)
+      (let* ((lst (car q))
+             (pre lst)
+             (curr (cdr lst)))
+        (do ()
+            ((or (eql obj (car curr))
+                 (eql curr (cdr q))))
+          (setf pre (cdr pre) curr (cdr curr)))
+        (if (eql curr (cdr q))
+            (if (eql obj (car curr))
+                (setf (cdr q) pre
+                      (cdr pre) nil
+                      (cdr curr) lst
+                      (car q) curr)
+                (return-from move-front))
+            (setf (cdr pre) (cdr curr)
+                  (cdr curr) lst
+                  (car q) curr)))))
+            
+;; ex6
+(defun memberp (obj lst &optional pres)
+  (if (eql (car lst) obj)
+      t
+      (if (or (member lst pres) (null lst))
+          nil
+          (memberp obj (cdr lst) (cons lst pres)))))
+
+
+;; ex7 
+(defun cdr-circularp (lst &optional pres)
+  (if (null lst)
+      nil
+      (if (member lst pres)
+          t
+          (cdr-circularp (cdr lst) (cons lst pres)))))
+
+;; ex8 
+(defun car-circularp (lst &optional pres)
+  (if (member (car lst) pres)
+      t
+      (if (or (member lst pres) (null lst))
+          nil
+          (car-circularp (cdr lst) (cons lst pres)))))
+
+
