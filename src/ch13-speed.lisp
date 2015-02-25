@@ -93,11 +93,28 @@
 
 (defun write-words (to)
   (with-open-file (out to :direction :output
-                          :if-exists :supersede)
+                       :if-exists :supersede)
     (map nil #'(lambda (x)
                  (fresh-line out)
                  (princ x out))
-             (xform #'nreverse
-                    (sort (xform #'nreverse dict)
-                          #'string<)))))
+         (xform #'nreverse
+                (sort (xform #'nreverse dict)
+                      #'string<)))))
 
+;; value last longer than the variable
+(defun our-reverse (lst)
+  (let ((rev nil))
+    (dolist (x lst)
+      (push x rev))
+    rev))
+
+;; variable's value need not last any longer than the variable does. 
+(defun our-adjoin (obj lst &rest args)
+  (if (apply #'member obj lst args)
+      lst
+      (cons obj lst)))
+(defun our-adjoin (obj lst &rest args)
+  (declare (dynamic-extent args))
+  (if (apply #'member obj lst args)
+      lst
+      (cons obj lst)))
