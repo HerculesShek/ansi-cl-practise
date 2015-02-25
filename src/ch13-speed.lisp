@@ -118,3 +118,88 @@
   (if (apply #'member obj lst args)
       lst
       (cons obj lst)))
+
+;;; Pools
+;; ship structure
+(defstruct ship
+  name flag tons)
+;; V1 quick prototype of a program
+(defparameter *harbor* nil)
+
+(defun enter (n f d)
+  (push (make-ship :name n :flag f :tons d)
+        *harbor*))
+
+(defun find-ship (n)
+  (find n *harbor* :key #'ship-name))
+
+(defun leave (n)
+  (setf *harbor*
+        (delete (find-ship n) *harbor*)))
+
+;; V2 without consing in fly 
+(defconstant pool (make-array 1000 :fill-pointer t))
+
+(dotimes (i 1000)
+  (setf (aref pool i) (make-ship)))
+
+(defconstant harbor (make-hash-table :size 1100
+                                     :test #'eq))
+
+(defun enter (n f d)
+  (let ((s (if (plusp (length pool))
+               (vector-pop pool)
+               (make-ship))))
+    (setf (ship-name s)        n
+          (ship-flag s)        f
+          (ship-tons s)        d
+          (gethash n harbor) s)))
+
+(defun find-ship (n) (gethash n harbor))
+
+(defun leave (n)
+  (let ((s (gethash n harbor)))
+    (remhash n harbor)
+    (vector-push s pool)))
+
+
+;;; Exercises 
+;; ex1 
+(declaim (inline my-add))
+(defun my-add (n)
+  (+ n 1))
+
+(defun call-my-add (n)
+  (my-add n))
+(defun see-res ()
+  (disassemble 'call-my-add))
+
+;; ex2 
+;; original
+(defun foo (x)
+  (if (zerop x)
+      0
+      (1+ (foo (1- x)))))
+;; tail call 
+(defun foo-t (x)
+  (labels ((f (x res)
+             (if (zerop x)
+                 res
+                 (f (1- x) (1+ res)))))
+    (f x 0)))
+
+(defun test-foo ()
+  (time (foo 20000))
+  (time (foo-t 20000)))
+
+;; ex3 
+
+
+
+
+;; ex4 
+
+
+;; ex5 
+
+
