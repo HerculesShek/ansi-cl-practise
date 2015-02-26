@@ -306,7 +306,7 @@
     (values (+ 1 (- n (svref month (- m 1)))) m)))
 ;; add n day to a date
 (defun date+ (d m y n)
-  (num->date (+ n (day->num d m y))))
+  (num->date (+ n (date->num d m y))))
 
 
 ;;; Exercises
