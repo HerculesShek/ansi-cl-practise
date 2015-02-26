@@ -145,6 +145,10 @@
 
 (defconstant harbor (make-hash-table :size 1100
                                      :test #'eq))
+;;; 加入下面的这个代码是为了解决 make-load-form问题 
+(defmethod make-load-form ((s ship) &optional env)
+  (declare (ignore env))
+  (make-load-form-saving-slots s))
 
 (defun enter (n f d)
   (let ((s (if (plusp (length pool))
@@ -278,11 +282,326 @@
 
 
 ;; ex3-b  Add declarations to The ray-tracer in Section 9.8. 
+(defmacro with-type (type expr)
+  (or
+   (leave-it expr)
+   `(the ,type ,(if (atom expr) 
+                    expr
+                    (expand-call type (binarize expr))))))
+
+(eval-when (:compile-toplevel :load-toplevel)
+  (defun leave-it (expr)
+    (if (atom expr)
+        (if (symbolp expr)
+            (if (char= #\? (char (symbol-name expr) 0)) expr)
+            expr)))
+
+  (defun expand-call (type expr)
+    `(,(car expr) ,@(mapcar #'(lambda (a)
+                                `(with-type ,type ,a))
+                            (cdr expr))))
+
+  (defun binarize (expr)
+    (if (and (nthcdr 3 expr)
+             (member (car expr) '(+ - * /)))
+        (destructuring-bind (op a1 a2 . rest) expr
+          (binarize `(,op (,op ,a1 ,a2) ,@rest)))
+        expr)))
+
+;;; Ray-Tracing
+(defpackage "RAY-TRACING"
+  (:use "COMMON-LISP")
+  (:export "RAY-TEST"))
+(in-package ray-tracing)
+
+;;; Math utilities. 
+;; returns the square of its argument.  
+(defun sq (x) (* x x))
+
+;; returns the magnitude of a vector given its x, y, and z components. 
+;; This function is used in unit-vector and distance 
+(defun mag (x y z)
+  (sqrt (+ (sq x) (sq y) (sq z))))
+
+;; returns three values representing the components of a unit vector--单位向量
+;; with the same direction
+(defun unit-vector (x y z)
+  (let ((d (mag x y z)))
+    (values (/ x d) (/ y d) (/ z d))))
+
+(defstruct (point (:conc-name nil))
+  x y z)
+
+;; returns the distance between two points in 3-space.
+(defun distance (p1 p2)
+  (mag (- (x p1) (x p2))
+       (- (y p1) (y p2))
+       (- (z p1) (z p2))))
+
+;; 一元二次方程求解取最小的解
+(defun minroot (a b c)
+  (if (zerop a)
+      (/ (- c) b)
+      (let ((disc (- (sq b) (* 4 a c))))
+        (unless (minusp disc)
+          (let ((discrt (sqrt disc)))
+            (min (/ (+ (- b) discrt) (* 2 a))
+                 (/ (- (- b) discrt) (* 2 a))))))))
+
+;;; ray tracing 
+;; The surface structure will be used to represent the objects in the simulated 
+;; world. More precisely, it will be included in the structures defined to 
+;; represent specific kinds of objects, like spheres. The surface structure itself 
+;; contains only a single field: a color ranging from 0 (black) to 1 (white).
+(defstruct surface color)
+
+(defparameter *world* nil)
+(defconstant eye (make-point :x 0 :y 0 :z 200))
+
+(defun tracer (pathname &optional (res 1))
+  (with-open-file (p pathname :direction :output)
+    (format p "P2 ~A ~A 255" (* res 100) (* res 100))
+    (let ((inc (/ res)))
+      (do ((y -50 (+ y inc)))
+          ((< (- 50 y) inc))
+        (do ((x -50 (+ x inc)))
+            ((< (- 50 x) inc))
+          (print (color-at x y) p))))))
+
+(defun color-at (x y)
+  (multiple-value-bind (xr yr zr)
+      (unit-vector (- x (x eye))
+                   (- y (y eye))
+                   (- 0 (z eye)))
+    (round (* (sendray eye xr yr zr) 255))))
+
+(defun sendray (pt xr yr zr)
+  (multiple-value-bind (s int) (first-hit pt xr yr zr)
+    (if s
+        (* (lambert s int xr yr zr) (surface-color s))
+        0)))
+
+(defun first-hit (pt xr yr zr)
+  (let (surface hit dist)
+    (dolist (s *world*)
+      (let ((h (intersect s pt xr yr zr)))
+        (when h
+          (let ((d (distance h pt)))
+            (when (or (null dist) (< d dist))
+              (setf surface s hit h dist d))))))
+    (values surface hit)))
+
+(defun lambert (s int xr yr zr)
+  (multiple-value-bind (xn yn zn) (normal s int)
+    (max 0 (+ (* xr xn) (* yr yn) (* zr zn)))))
+
+;;; Spheres
+(defstruct (sphere (:include surface))
+  radius center)
+
+(defun defsphere (x y z r c)
+  (let ((s (make-sphere :radius r
+                        :center (make-point :x x :y y :z z)
+                        :color c)))
+    (push s *world*)
+    s))
+
+(defun intersect (s pt xr yr zr)
+  (funcall (typecase s (sphere #'sphere-intersect))
+           s pt xr yr zr))
+
+(defun sphere-intersect (s pt xr yr zr)
+  (let* ((c (sphere-center s))
+         (n (minroot (+ (sq xr) (sq yr) (sq zr))
+                     (* 2 (+ (* (- (x pt) (x c)) xr)
+                             (* (- (y pt) (y c)) yr)
+                             (* (- (z pt) (z c)) zr)))
+                     (+ (sq (- (x pt) (x c)))
+                        (sq (- (y pt) (y c)))
+                        (sq (- (z pt) (z c)))
+                        (- (sq (sphere-radius s)))))))
+    (if n
+        (make-point :x (+ (x pt) (* n xr))
+                    :y (+ (y pt) (* n yr))
+                    :z (+ (z pt) (* n zr))))))
+
+(defun normal (s pt)
+  (funcall (typecase s (sphere #'sphere-normal))
+           s pt))
+
+(defun sphere-normal (s pt)
+  (let ((c (sphere-center s)))
+    (unit-vector (- (x c) (x pt))
+                 (- (y c) (y pt))
+                 (- (z c) (z pt)))))
+
+;;; ray tracing test 
+(defun ray-test (&optional (res 1))
+  (setf *world* nil)
+  (defsphere 0 -300 -1200 200 .8)
+  (defsphere -80 -150 -1200 200 .7)
+  (defsphere 70 -100 -1200 200 .9)
+  (do ((x -2 (1+ x)))
+      ((> x 2))
+    (do ((z 2 (1+ z)))
+        ((> z 8))
+      (defsphere (* x 200) 300 (* z -400) 40 .75)))
+  (tracer (make-pathname :name "spheres.pgm") res))
 
 
 ;; ex4 Rewrite the breadth-first  search code in Section 3.15 so that it conses as little as possible. 
+;;; breadth-first search
+;;; 网络可以这么表示: '((a b c) (b c) (c d)) --关联列表
+;;; 就是a节点可直达b和c，b可以直达c，c可以直达d
+;;; 调用的时候 (shortest-path 'a 'd net) => (a c d)
+;; 最短路径算法的入口
+(defun shortest-path (start end net)
+  (bfs end (list (list start)) net))
 
+;; 核心算法 广度优先搜索
+(defun bfs (end queue net)
+  (if (null queue)
+      nil
+      (let ((path (car queue)))
+        (let ((node (car path)))
+          (if (equal end node)
+              (reverse path)
+              (bfs end
+                   (append (cdr queue)
+                           (new-paths path node net))
+                   net))))))
+
+;; 功能函数
+(defun new-paths (path node net)
+  (mapcar #'(lambda (x) (cons x path))
+          (cdr (assoc node net))))
+;; 测试函数
+(defun bfs-test ()
+  (let ((net '((a b c) (b c) (c d))))
+    (shortest-path 'a 'd net)))
 
 ;; ex5 Modify the binary search tree code in Section 4.7 to use pools.
 
+;;; BST -- Binary Search Tree
+;; node 
+(defstruct (node (:print-function
+                  (lambda (node s d) 
+                    (declare (ignore d))
+                    (format s "#<~A>" (node-elt node)))))
+  elt
+  (l nil)
+  (r nil))
+
+(defconstant node-pool (make-array 2048 :fill-pointer t))
+
+(dotimes (i 2048)
+  (setf (aref pool i) (make-node)))
+
+;; insert 非平衡的
+;; obj---要查入到树中的元素的值
+;; bst---二叉搜索树
+;; <---表示的是比较函数 不是小于运算符
+(defun bst-insert (obj bst <)
+  (if (null bst)
+      (make-node :elt obj)
+      (let ((elt (node-elt bst)))
+        (if (eql elt obj) ; 已经存在此元素则不再插入 base case
+            bst
+            (if (funcall < obj elt)
+                (make-node :elt elt
+                           :l (bst-insert obj (node-l bst) <)
+                           :r (node-r bst))
+                (make-node :elt elt
+                           :l (node-l bst)
+                           :r (bst-insert obj (node-r bst) <)))))))
+;; search
+(defun bst-find (obj bst <)
+  (if bst
+      (let ((elt (node-elt bst)))
+        (if (eql obj elt)
+            bst
+            (if (funcall < obj elt)
+                (bst-find obj (node-l bst) <)
+                (bst-find obj (node-r bst) <))))))
+;; min
+(defun bst-min (bst)
+  (and bst
+       (or (bst-min (node-l bst)) bst)))
+;; max 
+(defun bst-max (bst)
+  (and bst
+       (or (bst-max (node-r bst)) bst)))
+;; remove min
+(defun bst-remove-min (bst)
+  (if (null (node-l bst))
+      (node-r bst)
+      (make-node :elt (node-elt bst)
+                 :l (bst-remove-min (node-l bst))
+                 :r (node-r bst))))
+;; remove max 
+(defun bst-remove-max (bst)
+  (if (null (node-r bst))
+      (node-l bst)
+      (make-node :elt (node-elt bst)
+                 :l (node-l bst)
+                 :r (bst-remove-max (node-r bst)))))
+;; remove obj from bst
+(defun bst-remove (obj bst <)
+  (if bst
+      (let ((elt (node-elt bst)))
+        (if (eql obj elt)
+            (percolate bst)
+            (if (funcall < obj elt)
+                (make-node :elt elt
+                           :l (bst-remove obj (node-l bst) <)
+                           :r (node-r bst))
+                (make-node :elt elt
+                           :l (node-l bst)
+                           :r (bst-remove obj (node-r bst) <)))))))
+(defun percolate (bst)
+  (let ((l (node-l bst)) (r (node-r bst)))
+    (cond ((null l) r)
+          ((null r) l)
+          (t (if (zerop (random 2)) ;; 这里随机选择前驱或者是后继
+                 (make-node :elt (node-elt (bst-max l))
+                            :l (bst-remove-max l)
+                            :r r)
+                 (make-node :elt (node-elt (bst-max r))
+                            :l l
+                            :r (bst-remove-min r)))))))
+;; print 前序
+(defun print-bst (bst)
+  (when bst
+    (format t "~A <--~A--> ~A~%" (node-l bst) bst (node-r bst))
+    (print-bst (node-l bst))
+    (print-bst (node-r bst))))
+;; 中序输出 排序
+(defun bst-traverse (fn bst)
+  (when bst
+    (bst-traverse fn (node-l bst))
+    (funcall fn (node-elt bst))
+    (bst-traverse fn (node-r bst))))
+
+;; BST的测试函数
+(defun bst-test()
+  (let ((nums))
+    (progn
+      (format t "insert 5 8 4 2 1 9 6 7 3 ...~%")
+      (dolist (x '(5 8 4 2 1 9 6 7 3)) ; insert nums 
+        (setf nums (bst-insert x nums #'<)))
+      (format t "if 12 exists? ~A" 
+              (if (bst-find 12 nums #'<) "yes" "no"))
+      (format t "~%if 9 exists? ~A" 
+              (if (bst-find 9 nums #'<) "yes" "no"))
+      (format t "~%min:~t~A" (bst-min nums))
+      (format t "~%max:~t~A" (bst-max nums))
+      (format t "~%before remove:~%print:~%")
+      (print-bst nums)
+      (format t "bst-traverse: ")
+      (bst-traverse #'(lambda (x) (format t "~A, " x)) nums)
+      (setf nums (bst-remove 2 nums #'<))
+      (format t "~%after remove 2:~%print:~%")
+      (print-bst nums)
+      (format t "bst-traverse:~%~T")
+      (bst-traverse #'princ nums))))
 
