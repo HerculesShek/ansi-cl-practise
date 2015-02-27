@@ -492,11 +492,16 @@
   (l nil)
   (r nil))
 
+;; pool storing the nodes of BST
 (defconstant node-pool (make-array 2048 :fill-pointer t))
 
+;; initialize the node-pool before fly
 (dotimes (i 2048)
   (setf (aref pool i) (make-node)))
 
+;; bst hashtable contains pairs [obj->node]
+(defconstant bsth (make-hash-table :size 2048
+                                   :test #'eq))
 ;; insert 非平衡的
 ;; obj---要查入到树中的元素的值
 ;; bst---二叉搜索树
