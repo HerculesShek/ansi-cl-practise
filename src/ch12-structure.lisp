@@ -329,7 +329,7 @@
 
 
 ;; ex7 
-(defun cdr-circularp (lst &optional pres)
+(defun cdr-circular? (lst &optional pres)
   (if (null lst)
       nil
       (if (member lst pres)
@@ -337,7 +337,7 @@
           (cdr-circularp (cdr lst) (cons lst pres)))))
 
 ;; ex8 
-(defun car-circularp (lst &optional pres)
+(defun car-circular? (lst &optional pres)
   (if (member (car lst) pres)
       t
       (if (or (member lst pres) (null lst))
