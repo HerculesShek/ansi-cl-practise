@@ -10,3 +10,23 @@
 
 (deftype proseq ()
   '(or vector (and list (not (satisfies cdr-circular?)))))
+
+;; TODO here is something wrong 
+(deftype multiple-of (n)
+  `(and integer (satisfies (lambda (x)
+                             (zerop (mod x ,n))))))
+
+
+;; copy binary files 
+(defun copy-file (from to)
+  (with-open-file (in from :direction :input
+                      :element-type 'unsigned-byte)
+    (with-open-file (out to :direction :output
+                         :element-type 'unsigned-byte)
+      (do ((i (read-byte in nil -1)
+              (read-byte in nil -1)))
+          ((minusp i))
+        (declare (fixnum i))
+        (write-byte i out)))))
+
+
