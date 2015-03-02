@@ -30,3 +30,6 @@
         (write-byte i out)))))
 
 
+(set-macro-character #\'
+                     #'(lambda (stream char)
+                         (list (quote quote) (read stream t nil t))))
