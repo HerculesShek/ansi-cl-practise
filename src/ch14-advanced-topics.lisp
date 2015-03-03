@@ -53,3 +53,67 @@
                                         ((> i (cadr pair))
                                          (list 'quote (nreverse accum)))
                                       (push i accum)))))
+
+
+;; giant loop!
+(defun even/odd (ns)
+  (loop for n in ns
+     if (evenp n)
+     collect n into evens
+     else collect n into odds
+     finally (return (values evens odds))))
+
+(defun sum (n)
+  (loop for x from 1 to n
+     sum x))
+
+;; get the most value and the corresponding element 
+(defun most (fn lst)
+  (if (null lst)
+      (values nil nil)
+      (let* ((wins (car lst))
+             (max (funcall fn wins)))
+        (dolist (obj (cdr lst))
+          (let ((score (funcall fn obj)))
+            (when (> score max)
+              (setf wins obj
+                    max  score))))
+        (values wins max))))
+
+(defun num-year (n)
+  (if (< n 0)
+      (do* ((y (- yzero 1) (- y 1))
+            (d (- (year-days y)) (- d (year-days y))))
+           ((<= d n) (values y (- n d))))
+      (do* ((y yzero (+ y 1))
+            (prev 0 d)
+            (d (year-days y) (+ d (year-days y))))
+           ((> d n) (values y (- n prev))))))
+
+
+(defun most (fn lst)
+  (if (null lst)
+      (values nil nil)
+      (loop with wins = (car lst)
+         with max = (funcall fn wins)
+         for obj in (cdr lst)
+         for score = (funcall fn obj)
+         when (> score max)
+           (do (setf wins obj
+                     max score)
+               finally (return (values wins max))))))
+
+(defun num-year (n)
+  (if (< n 0)
+      (loop for y downfrom (- yzero 1)
+         until (<= d n)
+         sum (- (year-days y)) into d
+         finally (return (values (+ y 1) (- n d))))
+      (loop with prev = 0
+         for y from yzero
+         until (> d n)
+         do (setf prev d)
+         sum (year-days y) into d
+         finally (return (values (- y 1)
+                                 (- n prev))))))
+
