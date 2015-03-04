@@ -117,3 +117,15 @@
          finally (return (values (- y 1)
                                  (- n prev))))))
 
+
+(loop for y = 0 then z
+   for x from 1 to 5
+   sum 1 into z
+   finally (return y z))
+
+(loop for x from 1 to 5
+   for y = 0 then z
+   sum 1 into z
+   finally (return y z))
+
+
