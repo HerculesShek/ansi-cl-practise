@@ -129,3 +129,9 @@
    finally (return y z))
 
 
+
+(defun user-input (prompt)
+  (format t prompt)
+  (let ((str (read-line)))
+    (or (ignore-errors (read-from-string str))
+        nil)))
