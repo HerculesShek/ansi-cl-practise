@@ -55,7 +55,8 @@
                                       (push i accum)))))
 
 
-;; giant loop!
+;;; giant loop!
+;; loop collect for in if collect into else finally
 (defun even/odd (ns)
   (loop for n in ns
      if (evenp n)
@@ -63,6 +64,7 @@
      else collect n into odds
      finally (return (values evens odds))))
 
+;; recurive sum 
 (defun sum (n)
   (loop for x from 1 to n
      sum x))
@@ -80,6 +82,7 @@
                     max  score))))
         (values wins max))))
 
+;; the number of days 
 (defun num-year (n)
   (if (< n 0)
       (do* ((y (- yzero 1) (- y 1))
@@ -90,7 +93,7 @@
             (d (year-days y) (+ d (year-days y))))
            ((> d n) (values y (- n prev))))))
 
-
+;; most --loop
 (defun most (fn lst)
   (if (null lst)
       (values nil nil)
@@ -103,6 +106,7 @@
                      max score)
                finally (return (values wins max))))))
 
+;; num-year --loop
 (defun num-year (n)
   (if (< n 0)
       (loop for y downfrom (- yzero 1)
@@ -117,7 +121,7 @@
          finally (return (values (- y 1)
                                  (- n prev))))))
 
-
+;; 
 (loop for y = 0 then z
    for x from 1 to 5
    sum 1 into z
@@ -135,3 +139,6 @@
   (let ((str (read-line)))
     (or (ignore-errors (read-from-string str))
         nil)))
+
+
+
