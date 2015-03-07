@@ -121,7 +121,7 @@
          finally (return (values (- y 1)
                                  (- n prev))))))
 
-;; 
+;; something wrong in the following 2 loops 
 (loop for y = 0 then z
    for x from 1 to 5
    sum 1 into z
