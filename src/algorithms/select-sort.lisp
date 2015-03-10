@@ -1,0 +1,15 @@
+;; select sort 
+;; TODO replace do with loop!
+(defun select-sort (arr)
+  (let ((min-idx 0))
+    (if (or (null arr) (= 0 (length arr)))
+        (return-from select-sort)
+        (do ((i 0 (1+ i)))
+            ((= i (1- (length arr))))
+          (setf min-idx i)
+          (do ((j (1+ i) (1+ j)))
+              ((= j (length arr)))
+            (if (< (svref arr j) (svref arr min-idx))
+                (setf min-idx j)))
+          (if (/= i min-idx)
+              (rotatef (svref arr min-idx) (svref arr i)))))))
