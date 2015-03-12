@@ -140,3 +140,8 @@
         nil)))
 
 
+;; loop repeat 
+(loop repeat 5
+   for y = 1 then (+ x y)
+   for x = 0 then y
+   collect y) ; ==> (1 1 2 4 8)
