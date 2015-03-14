@@ -1,5 +1,3 @@
-
-
 ;; string permutation
 (defun string-permutation (str)
   (u "" str))
