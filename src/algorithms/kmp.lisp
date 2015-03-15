@@ -1,4 +1,22 @@
-
+;; just match the first occurence of p in tar using KMP
+(defun kmp-matcher (tar p)
+  (let ((n (length tar)) 
+        (m (length p))
+        (r (compute-prefix p))
+        (p-idx 0)
+        (t-idx 0))
+    (do ()
+        ((or (>= p-idx m) (>= t-idx n)))
+      (cond ((char= (char tar t-idx) (char p p-idx))
+             (incf p-idx)
+             (incf t-idx))
+            ((= 0 p-idx)
+             (incf t-idx))
+            (t
+             (setf p-idx (1+ (svref r (1- p-idx)))))))
+    (if (= p-idx m)
+        (- t-idx p-idx)
+        -1)))
 
 ;; compute prefix 
 (defun compute-prefix (str)
