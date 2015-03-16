@@ -34,4 +34,7 @@
       (setf (svref r q) k))
     r))
           
-    
+;; test kmp matcher     
+(defun kmp-test ()
+   (kmp-matcher "BBC ABCDAB ABCDABCDABDE" "ABCDABD"))
+
