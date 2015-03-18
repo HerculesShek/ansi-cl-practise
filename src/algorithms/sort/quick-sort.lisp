@@ -19,6 +19,10 @@
     (rotatef (svref arr (1+ i)) (svref arr r))
     (1+ i)))
 
-
+;; test quick sort 
+(defun quick-sort-test ()
+  (let ((arr #(3 7 4 2 42 74 23 16 3 2 1 75)))
+    (quick-sort arr)
+    arr))
 
 
