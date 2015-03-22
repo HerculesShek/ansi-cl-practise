@@ -8,6 +8,11 @@
         (qsort arr p (1- q))
         (qsort arr (1+ q) r))))
 
+(defun randomized-partition (arr p r)
+  (let ((i (+ p (random (- r p)))))
+    (rotatef (svref arr i) (svref arr i))
+    (partition arr p r)))
+
 (defun partition (arr p r)
   (let ((x (svref arr r))
         (i (1- p)))
