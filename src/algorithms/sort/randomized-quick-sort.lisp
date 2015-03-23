@@ -1,12 +1,12 @@
 ;; quick sort 
 (defun quick-sort (arr)
-  (qsort arr 0 (1- (length arr))))
+  (random-qsort arr 0 (1- (length arr))))
 
-(defun qsort (arr p r)
+(defun random-qsort (arr p r)
   (if (< p r)
-      (let ((q (partition arr p r)))
-        (qsort arr p (1- q))
-        (qsort arr (1+ q) r))))
+      (let ((q (randomized-partition arr p r)))
+        (random-qsort arr p (1- q))
+        (random-qsort arr (1+ q) r))))
 
 (defun randomized-partition (arr p r)
   (let ((i (+ p (random (- r p)))))
