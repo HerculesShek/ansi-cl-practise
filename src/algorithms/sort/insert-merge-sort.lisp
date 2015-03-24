@@ -1,4 +1,4 @@
-;; merge sort 
+;; merge sort with inner insert sort 
 (defun insert-sort (array from to)
   (do ((i (1+ from) (1+ i)))
       ((> i to))
@@ -15,10 +15,13 @@
 
 (defun msort (arr from to)
   (when (< from to)
-    (let ((mid (+ from (floor (/ (- to from) 2)))))
-      (msort arr from mid)
-      (msort arr (1+ mid) to)
-      (my-merge arr from mid to))))
+    (if (< (1+ (- to from)) (log (length arr) 2))
+        (insert-sort arr from to)
+        (progn
+          (let ((mid (+ from (floor (/ (- to from) 2)))))
+            (msort arr from mid)
+            (msort arr (1+ mid) to)
+            (my-merge arr from mid to))))))
 
 (defun my-merge (arr from mid to)
   (let ((l-arr (make-array (1+ (- mid from))))
@@ -55,6 +58,10 @@
     (incf idx)
     (incf idx2)))
 
-    
+;; test 
+(defun test ()
+  (let ((arr #(7777 4 7 8 77 5 69 486 159 124 520 76 239 17 34 745 11 72 44 66 48 70 582 5 32 278 434 9)))
+    (merge-insert-sort arr)
+    arr))
     
   
