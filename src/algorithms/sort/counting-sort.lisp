@@ -18,5 +18,7 @@
         (incf (svref c i) (svref c (1- i))))
       (do ((j (1- (length arr)) (1- j)))
           ((< j 0))
-        (incf (svref c (svref arr i))))
+        (setf (svref b (1- (svref c (svref arr j)))) (svref arr j))
+        (decf (svref c (svref arr j))))
+      b)))
       
