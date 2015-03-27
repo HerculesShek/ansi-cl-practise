@@ -22,3 +22,7 @@
         (decf (svref c (svref arr j))))
       b)))
       
+;; test 
+(defun counting-sort-test ()
+  (let ((arr #(4 7 11 6 2 8 0 3 2 5 1 4 13 12 10 6 2 7 14)))
+    (counting-sort arr)))
