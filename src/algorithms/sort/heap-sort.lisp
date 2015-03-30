@@ -2,6 +2,12 @@
 (defun heap-sort (arr)
   )
 
+(defun build-max-heap (a)
+  (let ((from (floor (/ heap-size 2))))
+    (do ((i from (1- i)))
+        ((< i 1))
+      (max-heapify a (1- i)))))
+
 (defparameter heap-size 0)
 
 (defun max-heapify (a i)
