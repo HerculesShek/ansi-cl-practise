@@ -29,5 +29,7 @@
       (rotatef (svref a i) (svref a largest))
       (max-heapify a largest))))
       
-        
-  
+(defun heap-sort-test ()
+  (let ((arr #(23 33 1 2 34 9 40 76 33 2 34 55 8 99 6 45 92 76 49)))
+    (heap-sort arr)
+    arr))
