@@ -24,7 +24,7 @@
     (if (and (< l heap-size) (> (svref a l) (svref a largest)))
         (setf largest l))
     (if (and (< r heap-size) (> (svref a r) (svref a largest)))
-        (setf largest r))
+        (setf largest r)
     (when (/= largest i)
       (rotatef (svref a i) (svref a largest))
       (max-heapify a largest))))
